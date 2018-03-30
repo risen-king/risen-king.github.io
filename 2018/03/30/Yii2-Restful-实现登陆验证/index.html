@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Yii2 Restful 实现登陆验证 | Risen的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1 准备工作,完成基本 curd 代码1.1 给 user 表添加 access_token 字段1MariaDB [baojia]&amp;gt; alter table user add column access_token varchar(255); 1.2 添加测试用户打开 signup 页面,注册用户.地址:http://your-site/index.php?r=site%2Fsignup">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Yii2 Restful 实现登陆验证">
+<meta property="og:url" content="http://yoursite.com/2018/03/30/Yii2-Restful-实现登陆验证/index.html">
+<meta property="og:site_name" content="Risen的博客">
+<meta property="og:description" content="1 准备工作,完成基本 curd 代码1.1 给 user 表添加 access_token 字段1MariaDB [baojia]&amp;gt; alter table user add column access_token varchar(255); 1.2 添加测试用户打开 signup 页面,注册用户.地址:http://your-site/index.php?r=site%2Fsignup">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-570ad820a13fd67e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-0fc501bdc663bf28.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-e65fa3229b972b2a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-5d7c8aad8dd62b5f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-62996304d31c6e61.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-eae6d7365e50943a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-3dac934f81edab71.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-2247996990aa1037.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-7c23956c37c76ffb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-600b200f51102a42.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-2247996990aa1037.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-bc69ef22f95011f9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-6041fb85b5c6092d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-11b235dc86746225.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-03-30T11:19:31.485Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Yii2 Restful 实现登陆验证">
+<meta name="twitter:description" content="1 准备工作,完成基本 curd 代码1.1 给 user 表添加 access_token 字段1MariaDB [baojia]&amp;gt; alter table user add column access_token varchar(255); 1.2 添加测试用户打开 signup 页面,注册用户.地址:http://your-site/index.php?r=site%2Fsignup">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3248867-570ad820a13fd67e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="Risen的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Risen的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Yii2-Restful-实现登陆验证" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-实现登陆验证/" class="article-date">
+  <time datetime="2018-03-30T11:19:18.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Yii2 Restful 实现登陆验证
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-准备工作-完成基本-curd-代码"><a href="#1-准备工作-完成基本-curd-代码" class="headerlink" title="1 准备工作,完成基本 curd 代码"></a>1 准备工作,完成基本 curd 代码</h2><h3 id="1-1-给-user-表添加-access-token-字段"><a href="#1-1-给-user-表添加-access-token-字段" class="headerlink" title="1.1 给 user 表添加 access_token 字段"></a>1.1 给 user 表添加 access_token 字段</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [baojia]&gt; alter table user add column access_token varchar(255);</span><br></pre></td></tr></table></figure>
+<h3 id="1-2-添加测试用户"><a href="#1-2-添加测试用户" class="headerlink" title="1.2 添加测试用户"></a>1.2 添加测试用户</h3><p>打开 signup 页面,注册用户.<br>地址:<a href="http://your-site/index.php?r=site%2Fsignup" target="_blank" rel="noopener">http://your-site/index.php?r=site%2Fsignup</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-570ad820a13fd67e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 16-25-49 的屏幕截图.png"></p>
+<h3 id="1-3-生成-User-模型"><a href="#1-3-生成-User-模型" class="headerlink" title="1.3  生成 User 模型"></a>1.3  生成 User 模型</h3><p><img src="http://upload-images.jianshu.io/upload_images/3248867-0fc501bdc663bf28.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 16-02-08 的屏幕截图.png"></p>
+<p>打开 api/models/User.php,修改如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace api\models;</span><br><span class="line"></span><br><span class="line">use Yii;</span><br><span class="line">use yii\web\UnauthorizedHttpException;</span><br><span class="line">use common\models\User as BaseUser;</span><br><span class="line"></span><br><span class="line">class User extends BaseUser</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-4-生成-UserController"><a href="#1-4-生成-UserController" class="headerlink" title="1.4  生成  UserController"></a>1.4  生成  UserController</h3><p><img src="http://upload-images.jianshu.io/upload_images/3248867-e65fa3229b972b2a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 16-03-22 的屏幕截图.png"></p>
+<p>打开 api/modules/v1/controllers/UserController,修改如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">namespace api\modules\v1\controllers;</span><br><span class="line"></span><br><span class="line">class UserController extends \yii\web\Controller</span><br><span class="line">&#123;</span><br><span class="line">    public $modelClass = &apos;app\models\User&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-5-配置-urlManager"><a href="#1-5-配置-urlManager" class="headerlink" title="1.5 配置 urlManager"></a>1.5 配置 urlManager</h3><p>在 rule 项目下新增<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&apos;rules&apos; =&gt; [</span><br><span class="line">           ...</span><br><span class="line">              [</span><br><span class="line">                       &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">                       &apos;controller&apos; =&gt; &apos;v1/user&apos;,</span><br><span class="line"></span><br><span class="line">              ]</span><br><span class="line">           ...</span><br><span class="line">        ],</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-6-访问用户列表"><a href="#1-6-访问用户列表" class="headerlink" title="1.6  访问用户列表"></a>1.6  访问用户列表</h3><p>URL : GET <a href="http://api.baojia.local/v1/users" target="_blank" rel="noopener">http://api.baojia.local/v1/users</a><br><img src="http://upload-images.jianshu.io/upload_images/3248867-5d7c8aad8dd62b5f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 11-34-26 的屏幕截图.png"><br>其他的自己尝试吧</p>
+<p>基本的 curd 成功啦 !</p>
+<h2 id="2-实现登陆"><a href="#2-实现登陆" class="headerlink" title="2 实现登陆"></a>2 实现登陆</h2><h3 id="2-1-新建帮助类-Util-php"><a href="#2-1-新建帮助类-Util-php" class="headerlink" title="2.1 新建帮助类 Util.php"></a>2.1 新建帮助类 Util.php</h3><p>路径: common/helper/Util.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace common\helper;</span><br><span class="line"></span><br><span class="line">class  Util&#123;</span><br><span class="line">    public static function format($status,$data,$message)&#123;</span><br><span class="line"></span><br><span class="line">          if(empty($data))&#123;</span><br><span class="line">              $data = null;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          $result = [</span><br><span class="line">            &apos;status&apos; =&gt; $status,</span><br><span class="line">            &apos;data&apos;=&gt; $data,</span><br><span class="line">            &apos;message&apos;=&gt; $message</span><br><span class="line">         ];</span><br><span class="line"></span><br><span class="line">          return $result;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static  function error($message)&#123;</span><br><span class="line"></span><br><span class="line">          if( is_array($message) )&#123;</span><br><span class="line">                    $message = current($message);</span><br><span class="line"></span><br><span class="line">                    if(is_array($message))&#123;</span><br><span class="line">                              $message = current($message);</span><br><span class="line">                    &#125;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        return static::format( &apos;error&apos;, null, $message);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public static function  success($data)&#123;</span><br><span class="line"></span><br><span class="line">        return static::format( &apos;success&apos;, $data, &apos;&apos; );</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-新建-LoginForm-php"><a href="#2-2-新建-LoginForm-php" class="headerlink" title="2.2 新建 LoginForm.php"></a>2.2 新建 LoginForm.php</h3><p>路径: api/models/LoginForm.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace api\models;</span><br><span class="line"></span><br><span class="line">use Yii;</span><br><span class="line">use yii\base\Model;</span><br><span class="line"></span><br><span class="line">use api\models\User;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Login form</span><br><span class="line"> */</span><br><span class="line">class LoginForm extends Model</span><br><span class="line">&#123;</span><br><span class="line">    public $username;</span><br><span class="line">    public $password;</span><br><span class="line">    public $rememberMe = true;</span><br><span class="line"></span><br><span class="line">    //当前登陆 user 对象</span><br><span class="line">    private $_user;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * @inheritdoc</span><br><span class="line">     */</span><br><span class="line">    public function attributeLabels()</span><br><span class="line">    &#123;</span><br><span class="line">        return [</span><br><span class="line">            &apos;username&apos; =&gt; &apos;用户名&apos;,</span><br><span class="line">            &apos;password&apos; =&gt; &apos;密码&apos;,</span><br><span class="line">        ];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * @inheritdoc</span><br><span class="line">     */</span><br><span class="line">    public function rules()</span><br><span class="line">    &#123;</span><br><span class="line">        return [</span><br><span class="line">            // username and password are both required</span><br><span class="line">            [[&apos;username&apos;, &apos;password&apos;], &apos;required&apos;],</span><br><span class="line">            // rememberMe must be a boolean value</span><br><span class="line">            [&apos;rememberMe&apos;, &apos;boolean&apos;],</span><br><span class="line">            // password is validated by validatePassword()</span><br><span class="line">            [&apos;password&apos;, &apos;validatePassword&apos;],</span><br><span class="line">        ];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">   /**</span><br><span class="line">     * 自定义的密码认证方法</span><br><span class="line">     */</span><br><span class="line">    public function validatePassword($attribute, $params)</span><br><span class="line">    &#123;</span><br><span class="line">         if (!$this-&gt;hasErrors()) &#123;</span><br><span class="line"></span><br><span class="line">                    $user = $this-&gt;getUser();</span><br><span class="line"></span><br><span class="line">                    if (! $user  || ! $user-&gt;validatePassword($this-&gt;password)) &#123;</span><br><span class="line"></span><br><span class="line">                             $this-&gt;addError($attribute, &apos;用户名或密码错误.&apos;);</span><br><span class="line"></span><br><span class="line">                    &#125;</span><br><span class="line">         &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Logs in a user using the provided username and password.</span><br><span class="line">     *</span><br><span class="line">     * @return bool whether the user is logged in successfully</span><br><span class="line">     */</span><br><span class="line">    public function login()</span><br><span class="line">    &#123;</span><br><span class="line">        if ( $this-&gt;validate() ) &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            $this-&gt;onGenerateAccessToken();</span><br><span class="line"></span><br><span class="line">            return Yii::$app-&gt;user-&gt;login($this-&gt;getUser(), $this-&gt;rememberMe ? 3600*24*30 : 0);</span><br><span class="line"></span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 根据用户名获取用户的认证信息</span><br><span class="line">     *</span><br><span class="line">     * @return User|null</span><br><span class="line">     */</span><br><span class="line">    protected function getUser()</span><br><span class="line">    &#123;</span><br><span class="line">         if ($this-&gt;_user === null) &#123;</span><br><span class="line">                    $this-&gt;_user = User::findByUsername($this-&gt;username);</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         return $this-&gt;_user;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 登录校验成功后，为用户生成新的token</span><br><span class="line">     * 如果token失效，则重新生成token</span><br><span class="line">     */</span><br><span class="line">    public   function onGenerateAccessToken()</span><br><span class="line">    &#123;</span><br><span class="line"></span><br><span class="line">        if ( !User::checkAccessToken( $this-&gt;_user-&gt;access_token) ) &#123;</span><br><span class="line">                $this-&gt;_user-&gt;generateAccessToken();</span><br><span class="line">                $this-&gt;_user-&gt;save(false);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-修改urlManager-增加对-actionLogin-actionSignup-的支持"><a href="#2-2-修改urlManager-增加对-actionLogin-actionSignup-的支持" class="headerlink" title="2.2 修改urlManager,增加对 actionLogin,actionSignup 的支持"></a>2.2 修改urlManager,增加对 actionLogin,actionSignup 的支持</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&apos;rules&apos; =&gt; [</span><br><span class="line">           ...</span><br><span class="line">              [</span><br><span class="line">                       &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">                       &apos;controller&apos; =&gt; &apos;v1/user&apos;,</span><br><span class="line">                        &apos;extraPatterns&apos; =&gt; [</span><br><span class="line">                                  &apos;POST login&apos; =&gt; &apos;login&apos;,</span><br><span class="line">                                  &apos;POST signup&apos; =&gt; &apos;signup&apos;,</span><br><span class="line">                       ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">              ]</span><br><span class="line">           ...</span><br><span class="line">        ],</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-接下来-登陆吧"><a href="#2-3-接下来-登陆吧" class="headerlink" title="2.3 接下来 登陆吧"></a>2.3 接下来 登陆吧</h3><p>URL : POST  <a href="http://api.baojia.local/v1/users/login" target="_blank" rel="noopener">http://api.baojia.local/v1/users/login</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-62996304d31c6e61.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 16-39-07 的屏幕截图.png"></p>
+<h2 id="3-实现注册新用户"><a href="#3-实现注册新用户" class="headerlink" title="3 实现注册新用户"></a>3 实现注册新用户</h2><h3 id="3-1-修改-user表"><a href="#3-1-修改-user表" class="headerlink" title="3.1 修改 user表"></a>3.1 修改 user表</h3><p>因为我们想让 用户可以不填写 邮箱,如果填写邮箱,则需要检查邮箱唯一性.由于email 字段具有 unique 属性,无法设置成空字符串,因此设置默认值为 null<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [baojia]&gt; alter table user modify email varchar(255);</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-2-新建-SignupForm"><a href="#3-2-新建-SignupForm" class="headerlink" title="3.2 新建 SignupForm"></a>3.2 新建 SignupForm</h3><p>路径 : api/models/SignupForm.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">namespace api\models;</span><br><span class="line"></span><br><span class="line">use yii\base\Model;</span><br><span class="line">use api\models\User;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * SignUpForm</span><br><span class="line"> */</span><br><span class="line">class SignupForm extends Model</span><br><span class="line">&#123;</span><br><span class="line">          public $username;</span><br><span class="line">          public $email;</span><br><span class="line">          public $password;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">        * @inheritdoc</span><br><span class="line">        * 对数据的校验规则</span><br><span class="line">        */</span><br><span class="line">       public function rules()</span><br><span class="line">       &#123;</span><br><span class="line">           return [</span><br><span class="line">               // 对username的值进行两边去空格过滤</span><br><span class="line">               [&apos;username&apos;, &apos;trim&apos;],</span><br><span class="line">               [&apos;username&apos;, &apos;required&apos;, &apos;message&apos; =&gt; &apos;用户名不可以为空&apos;],</span><br><span class="line">               [&apos;username&apos;, &apos;unique&apos;, &apos;targetClass&apos; =&gt; &apos;\api\models\User&apos;, &apos;message&apos; =&gt; &apos;用户名已存在.&apos;],</span><br><span class="line">               [&apos;username&apos;, &apos;string&apos;, &apos;min&apos; =&gt; 2, &apos;max&apos; =&gt; 255],</span><br><span class="line"></span><br><span class="line">              [&apos;email&apos;, &apos;trim&apos;],</span><br><span class="line">              [&apos;email&apos;, &apos;default&apos;, &apos;value&apos; =&gt; null],</span><br><span class="line">              [&apos;email&apos;, &apos;email&apos;],</span><br><span class="line">              [&apos;email&apos;, &apos;string&apos;, &apos;max&apos; =&gt; 255],</span><br><span class="line">              [&apos;email&apos;, &apos;unique&apos;, &apos;targetClass&apos; =&gt; &apos;\api\models\User&apos;, &apos;message&apos; =&gt; &apos;邮箱已经被使用了.&apos;,&apos;when&apos;=&gt; function($model, $attribute)&#123;</span><br><span class="line">                        return  !!$attribute; // 邮箱不为空时候检查唯一性</span><br><span class="line">              &#125;],</span><br><span class="line"></span><br><span class="line">               [&apos;password&apos;, &apos;required&apos;, &apos;message&apos; =&gt; &apos;密码不可以为空&apos;],</span><br><span class="line">               [&apos;password&apos;, &apos;string&apos;, &apos;min&apos; =&gt; 6, &apos;tooShort&apos; =&gt; &apos;密码至少填写6位&apos;],</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">           ];</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       /**</span><br><span class="line">        * Signs user up.</span><br><span class="line">        *</span><br><span class="line">        * @return User|null the saved model or null if saving fails</span><br><span class="line">        */</span><br><span class="line">       public function signup()&#123;</span><br><span class="line"></span><br><span class="line">           // 调用validate方法对表单数据进行验证，验证规则参考上面的rules方法</span><br><span class="line">            if (  !$this-&gt;validate() )&#123;</span><br><span class="line">                    return null;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            // 实现数据入库操作</span><br><span class="line">            $user = new User;</span><br><span class="line"></span><br><span class="line">            $user-&gt;username = $this-&gt;username;</span><br><span class="line">            $user-&gt;email = $this-&gt;email;</span><br><span class="line"></span><br><span class="line">            // 设置密码</span><br><span class="line">            $user-&gt;setPassword($this-&gt;password);</span><br><span class="line"></span><br><span class="line">             // 生成 &quot;remember me&quot; 认证key</span><br><span class="line">            $user-&gt;generateAuthkey();</span><br><span class="line"></span><br><span class="line">            // save(false)的意思是：不调用 User 的 rules 再做校验并实现数据入库操作</span><br><span class="line">             // 这里这个 false 如果不加，save底层会调用  User 的rules方法再对数据进行一次校验，</span><br><span class="line">             // 因为我们上面已经调用Signup的rules校验过了，这里就没必要在用 User 的 rules 校验了</span><br><span class="line">            return   $user-&gt;save(false) ? $user : null;</span><br><span class="line"></span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-3-修改-UserController-增加-actionSignup方法"><a href="#3-3-修改-UserController-增加-actionSignup方法" class="headerlink" title="3.3 修改 UserController,增加 actionSignup方法"></a>3.3 修改 UserController,增加 actionSignup方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"> /*</span><br><span class="line"> * 注册新用户</span><br><span class="line"> */</span><br><span class="line">public function actionSignup()&#123;</span><br><span class="line"></span><br><span class="line">      $model = new SignupForm();</span><br><span class="line"></span><br><span class="line">      $model-&gt;setAttributes(Yii::$app-&gt;request-&gt;post());</span><br><span class="line"></span><br><span class="line">      if( $model-&gt;signup() )&#123;</span><br><span class="line"></span><br><span class="line">            return Util::success( [</span><br><span class="line">                    &apos;username&apos;=&gt;$model-&gt;username,</span><br><span class="line">                    &apos;email&apos;=&gt;$model-&gt;email</span><br><span class="line">                ] );</span><br><span class="line"></span><br><span class="line">      &#125;else&#123;</span><br><span class="line"></span><br><span class="line">           return Util::error( $model-&gt;getErrors() );</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-3-修改urlManager-增加对-actionSignup-的支持"><a href="#3-3-修改urlManager-增加对-actionSignup-的支持" class="headerlink" title="3.3 修改urlManager,增加对 actionSignup 的支持"></a>3.3 修改urlManager,增加对 actionSignup 的支持</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&apos;rules&apos; =&gt; [</span><br><span class="line">           ...</span><br><span class="line">              [</span><br><span class="line">                       &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">                       &apos;controller&apos; =&gt; &apos;v1/user&apos;,</span><br><span class="line">                        &apos;extraPatterns&apos; =&gt; [</span><br><span class="line">                                  &apos;POST login&apos; =&gt; &apos;login&apos;,</span><br><span class="line">                                  &apos;POST signup&apos; =&gt; &apos;signup&apos;,</span><br><span class="line">                       ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">              ]</span><br><span class="line">           ...</span><br><span class="line">        ],</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-愉快的注册吧"><a href="#3-4-愉快的注册吧" class="headerlink" title="3.4 愉快的注册吧"></a>3.4 愉快的注册吧</h3><p>URL : POST <a href="http://api.baojia.local/v1/users/signup" target="_blank" rel="noopener">http://api.baojia.local/v1/users/signup</a></p>
+<p> <img src="http://upload-images.jianshu.io/upload_images/3248867-eae6d7365e50943a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 17-56-51 的屏幕截图.png"></p>
+<p> <img src="http://upload-images.jianshu.io/upload_images/3248867-3dac934f81edab71.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 17-59-51 的屏幕截图.png"></p>
+<h2 id="4-实现登陆验证"><a href="#4-实现登陆验证" class="headerlink" title="4 实现登陆验证"></a>4 实现登陆验证</h2><h3 id="4-1-开放-login-signup-可以访问-其他方法禁止非法访问"><a href="#4-1-开放-login-signup-可以访问-其他方法禁止非法访问" class="headerlink" title="4.1 开放 login/signup 可以访问,其他方法禁止非法访问"></a>4.1 开放 login/signup 可以访问,其他方法禁止非法访问</h3><p>现在谁都可以访问我的用户信息,宝宝好害怕怕~,肿么办? 添加用户认证行为就可以啦.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public function behaviors()</span><br><span class="line">&#123;</span><br><span class="line">    return ArrayHelper::merge (parent::behaviors(), [</span><br><span class="line">         &apos;authenticator&apos; =&gt; [</span><br><span class="line">                    &apos;class&apos; =&gt; QueryParamAuth::className() ,</span><br><span class="line"></span><br><span class="line">         ]</span><br><span class="line">    ] );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>说没有授权<br><img src="http://upload-images.jianshu.io/upload_images/3248867-2247996990aa1037.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-27-50 的屏幕截图.png"></p>
+<p>But ,不能登陆了!!!</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-7c23956c37c76ffb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-18-48 的屏幕截图.png"></p>
+<p>不用急,在 UserController 添加一行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public function behaviors()</span><br><span class="line"> &#123;</span><br><span class="line">    return ArrayHelper::merge (parent::behaviors(), [</span><br><span class="line">         &apos;authenticator&apos; =&gt; [</span><br><span class="line">                &apos;class&apos; =&gt; HttpBasicAuth::className(),</span><br><span class="line">                &apos;optional&apos; =&gt; [</span><br><span class="line">                      &apos;login&apos;,</span><br><span class="line">                      &apos;signup&apos;,</span><br><span class="line"></span><br><span class="line">                ],</span><br><span class="line">         ]</span><br><span class="line">    ] );</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>现在 login,signup 都可以访问,其他方法无法访,宝宝再也不怕了.<br><img src="http://upload-images.jianshu.io/upload_images/3248867-600b200f51102a42.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-23-36 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-2247996990aa1037.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-27-50 的屏幕截图.png"></p>
+<h3 id="4-2-访问用户信息"><a href="#4-2-访问用户信息" class="headerlink" title="4.2 访问用户信息"></a>4.2 访问用户信息</h3><p>用户登陆,获取 access_token,存储到客户端<br><img src="http://upload-images.jianshu.io/upload_images/3248867-bc69ef22f95011f9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-37-38 的屏幕截图.png"></p>
+<p>使用 access_token:nLFZL8JLoTdRg1YZ0e4rWWCN-L0N9xOy_1503397324 访问用户信息</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-6041fb85b5c6092d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-38-07 的屏幕截图.png"></p>
+<p>修改 token,在 token 前加一个感叹号,access_token:!nLFZL8JLoTdRg1YZ0e4rWWCN-L0N9xOy_1503397324 ,无法访问用户信息啦<br><img src="http://upload-images.jianshu.io/upload_images/3248867-11b235dc86746225.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-38-21 的屏幕截图.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-实现登陆验证/" data-id="cjfdvevt70000n8np75kq1fpw" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Yii2 Restful 跨域调用 - CORS 过滤器
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/03/30/Yii2-Restful-自定义方法/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Yii2 Restful 自定义方法</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/">Yii2 Restful 跨域调用 - CORS 详解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/">Yii2 Restful 跨域调用 - CORS 过滤器</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-实现登陆验证/">Yii2 Restful 实现登陆验证</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-自定义方法/">Yii2 Restful 自定义方法</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-文件上传/">Yii2 Restful  文件上传</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 risen<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

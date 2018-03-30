@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Yii2 Restful  支持分页 | Risen的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="大部分情况下，我们的数据是需要分页的。可是 Yii2 restful默认情况下并不显示分页信息,我们不知道当前是哪一页，如何访问下一页，那么如何才能显示出分页数据呢？不要急，下面通过例子来说明。  1 新建 stock 接口，[参考Yii2 Restful快速构建CURD][1]2 访问信息列表，发现没有分页数据操作 : stock/indexURL : GET http://api.baoji">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Yii2 Restful  支持分页">
+<meta property="og:url" content="http://yoursite.com/2018/03/30/Yii2-Restful-支持分页/index.html">
+<meta property="og:site_name" content="Risen的博客">
+<meta property="og:description" content="大部分情况下，我们的数据是需要分页的。可是 Yii2 restful默认情况下并不显示分页信息,我们不知道当前是哪一页，如何访问下一页，那么如何才能显示出分页数据呢？不要急，下面通过例子来说明。  1 新建 stock 接口，[参考Yii2 Restful快速构建CURD][1]2 访问信息列表，发现没有分页数据操作 : stock/indexURL : GET http://api.baoji">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-c93873cacd0b1c4b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-98ff1cf14db7f287.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-a1e559f869a7ee68.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-03-30T11:17:24.581Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Yii2 Restful  支持分页">
+<meta name="twitter:description" content="大部分情况下，我们的数据是需要分页的。可是 Yii2 restful默认情况下并不显示分页信息,我们不知道当前是哪一页，如何访问下一页，那么如何才能显示出分页数据呢？不要急，下面通过例子来说明。  1 新建 stock 接口，[参考Yii2 Restful快速构建CURD][1]2 访问信息列表，发现没有分页数据操作 : stock/indexURL : GET http://api.baoji">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3248867-c93873cacd0b1c4b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="Risen的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Risen的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Yii2-Restful-支持分页" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-支持分页/" class="article-date">
+  <time datetime="2018-03-30T11:17:08.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Yii2 Restful  支持分页
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>大部分情况下，我们的数据是需要分页的。可是 Yii2 restful<br>默认情况下并不显示分页信息,我们不知道当前是哪一页，如何访问下一页，那么如何才能显示出分页数据呢？不要急，下面通过例子来说明。</p>
+</blockquote>
+<h2 id="1-新建-stock-接口，-参考Yii2-Restful快速构建CURD-1"><a href="#1-新建-stock-接口，-参考Yii2-Restful快速构建CURD-1" class="headerlink" title="1 新建 stock 接口，[参考Yii2 Restful快速构建CURD][1]"></a>1 新建 stock 接口，[参考Yii2 Restful快速构建CURD][1]</h2><h2 id="2-访问信息列表，发现没有分页数据"><a href="#2-访问信息列表，发现没有分页数据" class="headerlink" title="2 访问信息列表，发现没有分页数据"></a>2 访问信息列表，发现没有分页数据</h2><p>操作 : stock/index<br>URL : GET <a href="http://api.baojia.local/v1/stocks" target="_blank" rel="noopener">http://api.baojia.local/v1/stocks</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-c93873cacd0b1c4b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 10-26-29 的屏幕截图.png"></p>
+<h2 id="3-修改-StockController-新增-serializer-属性"><a href="#3-修改-StockController-新增-serializer-属性" class="headerlink" title="3 修改 StockController,新增 $serializer 属性"></a>3 修改 StockController,新增 $serializer 属性</h2><p>文件路径 ： api\modules\v1\controllers\StockController.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace api\modules\v1\controllers;</span><br><span class="line"></span><br><span class="line">use yii\rest\ActiveController;</span><br><span class="line"></span><br><span class="line">class  StockController  extends ActiveController</span><br><span class="line">&#123;</span><br><span class="line">    public $modelClass = &apos;api\models\Stock&apos;;</span><br><span class="line"></span><br><span class="line">    public $serializer = [</span><br><span class="line">        &apos;class&apos; =&gt; &apos;yii\rest\Serializer&apos;,</span><br><span class="line">        &apos;collectionEnvelope&apos; =&gt; &apos;items&apos;,</span><br><span class="line">    ];</span><br></pre></td></tr></table></figure></p>
+<h2 id="4-再次访问信息列表，发现数据在-items-项目下，在-links-和-metadata-中有分页信息"><a href="#4-再次访问信息列表，发现数据在-items-项目下，在-links-和-metadata-中有分页信息" class="headerlink" title="4 再次访问信息列表，发现数据在 items 项目下，在 _links 和 _metadata 中有分页信息"></a>4 再次访问信息列表，发现数据在 items 项目下，在 _links 和 _metadata 中有分页信息</h2><p><img src="http://upload-images.jianshu.io/upload_images/3248867-98ff1cf14db7f287.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 10-24-20 的屏幕截图.png"></p>
+<h2 id="3-使用-links-中的-next-项，访问下一页。"><a href="#3-使用-links-中的-next-项，访问下一页。" class="headerlink" title="3 使用 _links 中的 next 项，访问下一页。"></a>3 使用 _links 中的 next 项，访问下一页。</h2><p>self 代表当前页<br>next 代表下一页<br>last 代表最后一页面</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-a1e559f869a7ee68.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 10-25-30 的屏幕截图.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-支持分页/" data-id="cjfdvevtn0002n8npmowidcwe" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/03/30/Yii2-Restful-文件上传/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Yii2 Restful  文件上传
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/03/30/Yii2-Restful-快速构建-CURD/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Yii2 Restful  快速构建 CURD</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/">Yii2 Restful 跨域调用 - CORS 详解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/">Yii2 Restful 跨域调用 - CORS 过滤器</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-实现登陆验证/">Yii2 Restful 实现登陆验证</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-自定义方法/">Yii2 Restful 自定义方法</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-文件上传/">Yii2 Restful  文件上传</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 risen<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

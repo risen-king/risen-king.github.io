@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Yii2 Restful 自定义方法 | Risen的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="yii2 的 restful 接口的默认 帮我们实现了 curd,可是我要怎么添加自定义方法呢,下面以添加一个 搜索方法为例介绍.  1 打开 NewsController,添加 actionSearch 方法12345678910111213141516171819202122&amp;lt;?phpnamespace api\modules\v1\controllers;use api\models">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Yii2 Restful 自定义方法">
+<meta property="og:url" content="http://yoursite.com/2018/03/30/Yii2-Restful-自定义方法/index.html">
+<meta property="og:site_name" content="Risen的博客">
+<meta property="og:description" content="yii2 的 restful 接口的默认 帮我们实现了 curd,可是我要怎么添加自定义方法呢,下面以添加一个 搜索方法为例介绍.  1 打开 NewsController,添加 actionSearch 方法12345678910111213141516171819202122&amp;lt;?phpnamespace api\modules\v1\controllers;use api\models">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-c9e2a97afdb4ef4e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-0292849cea370a0c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-03-30T11:18:46.957Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Yii2 Restful 自定义方法">
+<meta name="twitter:description" content="yii2 的 restful 接口的默认 帮我们实现了 curd,可是我要怎么添加自定义方法呢,下面以添加一个 搜索方法为例介绍.  1 打开 NewsController,添加 actionSearch 方法12345678910111213141516171819202122&amp;lt;?phpnamespace api\modules\v1\controllers;use api\models">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3248867-c9e2a97afdb4ef4e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="Risen的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Risen的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Yii2-Restful-自定义方法" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-自定义方法/" class="article-date">
+  <time datetime="2018-03-30T11:18:36.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Yii2 Restful 自定义方法
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>yii2 的 restful 接口的默认 帮我们实现了 curd,可是我要怎么添加自定义方法呢,下面以添加一个 搜索方法为例介绍.</p>
+</blockquote>
+<h2 id="1-打开-NewsController-添加-actionSearch-方法"><a href="#1-打开-NewsController-添加-actionSearch-方法" class="headerlink" title="1 打开 NewsController,添加 actionSearch 方法"></a>1 打开 NewsController,添加 actionSearch 方法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">namespace api\modules\v1\controllers;</span><br><span class="line"></span><br><span class="line">use api\models\News;</span><br><span class="line"></span><br><span class="line">class NewsController extends \yii\rest\ActiveController</span><br><span class="line">&#123;</span><br><span class="line">      public $modelClass = &apos;api\models\News&apos;;</span><br><span class="line"></span><br><span class="line">      public function actionSearch($keyword)&#123;</span><br><span class="line"></span><br><span class="line">            if(!$keyword)&#123;</span><br><span class="line">                return null;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $models = News::find()-&gt;where([&apos;like&apos;, &apos;title&apos;, $keyword])-&gt;all();</span><br><span class="line"></span><br><span class="line">            return $models;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-访问搜索方法"><a href="#2-访问搜索方法" class="headerlink" title="2 访问搜索方法"></a>2 访问搜索方法</h2><p>URL : <a href="http://api.baojia.local/v1/news/search/111" target="_blank" rel="noopener">http://api.baojia.local/v1/news/search/111</a></p>
+<p>纳尼? 找不到方法?</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-c9e2a97afdb4ef4e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 19-10-43 的屏幕截图.png"></p>
+<h2 id="3-修改-urlMangager-增加一条-rule"><a href="#3-修改-urlMangager-增加一条-rule" class="headerlink" title="3  修改 urlMangager,增加一条 rule"></a>3  修改 urlMangager,增加一条 rule</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">return [</span><br><span class="line"></span><br><span class="line"> ......</span><br><span class="line"></span><br><span class="line"> &apos;rules&apos; =&gt; [</span><br><span class="line">    [</span><br><span class="line">        &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">        &apos;controller&apos; =&gt;  &apos;v1/news&apos;,</span><br><span class="line">        &apos;extraPatterns&apos; =&gt; [</span><br><span class="line">            &apos;GET  search/&lt;keyword&gt;&apos; =&gt; &apos;search&apos;,</span><br><span class="line"></span><br><span class="line">        ]</span><br><span class="line">   ],</span><br><span class="line"></span><br><span class="line">     ],</span><br><span class="line"></span><br><span class="line"> ......</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-0292849cea370a0c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 19-05-04 的屏幕截图.png"></p>
+<p>收工!!!</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-自定义方法/" data-id="cjfdvevu20004n8npavqpujrc" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/03/30/Yii2-Restful-实现登陆验证/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Yii2 Restful 实现登陆验证
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/03/30/Yii2-Restful-文件上传/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Yii2 Restful  文件上传</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/">Yii2 Restful 跨域调用 - CORS 详解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/">Yii2 Restful 跨域调用 - CORS 过滤器</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-实现登陆验证/">Yii2 Restful 实现登陆验证</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-自定义方法/">Yii2 Restful 自定义方法</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-文件上传/">Yii2 Restful  文件上传</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 risen<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

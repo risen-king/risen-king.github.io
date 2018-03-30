@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Yii2 Restful 跨域调用 - CORS 详解 | Risen的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1 什么是CORSCORS是一个W3C标准，全称是”跨域资源共享”（Cross-origin resource sharing）。 它允许浏览器向跨源服务器发出XMLHttpRequest请求，从而绕过AJAX的同源策略(Same-origin Policy)那么什么是Same-origin Policy呢？简单地说，在一个浏览器中访问的网站不能访问另一个网站中的数据，除非这两个网站具有相同的Or">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Yii2 Restful 跨域调用 - CORS 详解">
+<meta property="og:url" content="http://yoursite.com/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/index.html">
+<meta property="og:site_name" content="Risen的博客">
+<meta property="og:description" content="1 什么是CORSCORS是一个W3C标准，全称是”跨域资源共享”（Cross-origin resource sharing）。 它允许浏览器向跨源服务器发出XMLHttpRequest请求，从而绕过AJAX的同源策略(Same-origin Policy)那么什么是Same-origin Policy呢？简单地说，在一个浏览器中访问的网站不能访问另一个网站中的数据，除非这两个网站具有相同的Or">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-6fb16ac5aeb140fa.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-91384fa4d1944d4a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-28bb8106fb07ffdd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-66231d8bf7ff81ac.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-5fca0801599c5987.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-762c56c79194b72d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-227ea9651859d48c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-a92c3dfb85885641.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-65a552696530b6ea.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-d245a46ae82e482b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-d1b0c56646bbc0fb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-a541532aacb7ef9b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-b5e7803e09cf97c5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-845efb543507c091.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/3248867-23062697d449a157.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-03-30T11:21:09.414Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Yii2 Restful 跨域调用 - CORS 详解">
+<meta name="twitter:description" content="1 什么是CORSCORS是一个W3C标准，全称是”跨域资源共享”（Cross-origin resource sharing）。 它允许浏览器向跨源服务器发出XMLHttpRequest请求，从而绕过AJAX的同源策略(Same-origin Policy)那么什么是Same-origin Policy呢？简单地说，在一个浏览器中访问的网站不能访问另一个网站中的数据，除非这两个网站具有相同的Or">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/3248867-6fb16ac5aeb140fa.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="Risen的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Risen的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Yii2-Restful-跨域调用-CORS-详解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/" class="article-date">
+  <time datetime="2018-03-30T11:20:55.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Yii2 Restful 跨域调用 - CORS 详解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-什么是CORS"><a href="#1-什么是CORS" class="headerlink" title="1 什么是CORS"></a>1 什么是CORS</h2><p>CORS是一个W3C标准，全称是”跨域资源共享”（Cross-origin resource sharing）。</p>
+<p>它允许浏览器向跨源服务器发出XMLHttpRequest请求，从而绕过AJAX的同源策略(Same-origin Policy)<br>那么什么是Same-origin Policy呢？简单地说，在一个浏览器中访问的网站不能访问另一个网站中的数据，除非这两个网站具有相同的Origin，也即是拥有相同的协议、主机地址以及端口。一旦这三项数据中有一项不同，那么该资源就将被认为是从不同的Origin得来的，进而不被允许访问。</p>
+<h2 id="2-CORS-请求分类"><a href="#2-CORS-请求分类" class="headerlink" title="2 CORS 请求分类"></a>2 CORS 请求分类</h2><p>浏览器将CORS请求分成两类：简单请求（simple request）和非简单请求（not-so-simple request）。</p>
+<p>只要同时满足以下两大条件，就属于简单请求。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1 请求方法是以下三种方法之一 ：GET |  POST | HEAD</span><br><span class="line"></span><br><span class="line">2 HTTP 的头信息不超出以下几种字段：</span><br><span class="line">    Accept</span><br><span class="line">    Accept-Language</span><br><span class="line">    Content-Language</span><br><span class="line">    Content-Type （只限于三个值 application/x-www-form-urlencoded | multipart/form-data | text/plain ）</span><br><span class="line">    Last-Event-ID</span><br></pre></td></tr></table></figure>
+<p>凡是不同时满足上面两个条件，就属于非简单请求。</p>
+<p>浏览器对这两种请求的处理，是不一样的。</p>
+<h2 id="3-准备测试环境"><a href="#3-准备测试环境" class="headerlink" title="3 准备测试环境"></a>3 准备测试环境</h2><h4 id="3-1-新建-Stock-Api"><a href="#3-1-新建-Stock-Api" class="headerlink" title="3.1 新建 Stock Api"></a>3.1 新建 Stock Api</h4><h4 id="3-2-添加-Cors-过滤器"><a href="#3-2-添加-Cors-过滤器" class="headerlink" title="3.2 添加 Cors 过滤器"></a>3.2 添加 Cors 过滤器</h4><p>打开 StockController,修改代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace api\modules\v1\controllers;</span><br><span class="line"></span><br><span class="line">use yii\filters\Cors;</span><br><span class="line">use yii\helpers\ArrayHelper;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">use yii\rest\ActiveController;</span><br><span class="line"></span><br><span class="line">class  StockController  extends ActiveController</span><br><span class="line">&#123;</span><br><span class="line">    public $modelClass = &apos;api\models\Stock&apos;;</span><br><span class="line"></span><br><span class="line">    public function behaviors()</span><br><span class="line">    &#123;</span><br><span class="line">          return ArrayHelper::merge([</span><br><span class="line">                [</span><br><span class="line">                        &apos;class&apos; =&gt; Cors::className(),</span><br><span class="line">                        &apos;cors&apos; =&gt; [</span><br><span class="line">                            &apos;Origin&apos; =&gt; [&apos;http://test.local&apos;],</span><br><span class="line">                            &apos;Access-Control-Request-Method&apos; =&gt; [],</span><br><span class="line">                            &apos;Access-Control-Request-Headers&apos;=&gt;[&apos;*&apos;]</span><br><span class="line">                        ],</span><br><span class="line"></span><br><span class="line">                ],</span><br><span class="line">        ], parent::behaviors());</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-3-新建测试站点-test-local"><a href="#3-3-新建测试站点-test-local" class="headerlink" title="3.3 新建测试站点 test.local"></a>3.3 新建测试站点 test.local</h4><p>添加数据文件 data.json</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;name&quot;: &quot;ahcj&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>添加文件 index.html</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge,chrome=1&quot;&gt;</span><br><span class="line">&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html;charset=utf-8&quot;&gt;</span><br><span class="line"></span><br><span class="line">&lt;title&gt;CORS TEST&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line"></span><br><span class="line">&lt;body id=&quot;body&quot;&gt;</span><br><span class="line">Please look at the Console and Network pannel ......</span><br><span class="line">&lt;/body&gt;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line"></span><br><span class="line">function getSameOrigin()&#123;</span><br><span class="line"></span><br><span class="line">        var data = null;</span><br><span class="line"></span><br><span class="line">        var xhr = new XMLHttpRequest();</span><br><span class="line"></span><br><span class="line">        xhr.addEventListener(&quot;readystatechange&quot;, function () &#123;</span><br><span class="line">            if (this.readyState === 4) &#123;</span><br><span class="line"></span><br><span class="line">                console.log(this.responseText);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        xhr.open(&quot;GET&quot;, &quot;data.json&quot;);</span><br><span class="line"></span><br><span class="line">        xhr.send(data);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function get()&#123;</span><br><span class="line"></span><br><span class="line">        var data = null;</span><br><span class="line"></span><br><span class="line">        var xhr = new XMLHttpRequest();</span><br><span class="line"></span><br><span class="line">        xhr.addEventListener(&quot;readystatechange&quot;, function () &#123;</span><br><span class="line">            if (this.readyState === 4) &#123;</span><br><span class="line"></span><br><span class="line">                console.log(this.responseText);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        xhr.open(&quot;GET&quot;, &quot;http://api.baojia.local/v1/stocks/3001&quot;);</span><br><span class="line"></span><br><span class="line">        xhr.send(data);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function post()&#123;</span><br><span class="line">    var data = &quot;symbol=999999&amp;code=sh999999&amp;name=This%20is%20a%20test&amp;ipo_date=2017-070-7&quot;;</span><br><span class="line"></span><br><span class="line">    var xhr = new XMLHttpRequest();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    xhr.addEventListener(&quot;readystatechange&quot;, function () &#123;</span><br><span class="line">        if (this.readyState === 4) &#123;</span><br><span class="line">                console.log(this.responseText);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    xhr.open(&quot;POST&quot;, &quot;http://api.baojia.local/v1/stocks&quot;);</span><br><span class="line">    xhr.setRequestHeader(&quot;content-type&quot;, &quot;application/x-www-form-urlencoded&quot;);</span><br><span class="line"></span><br><span class="line">    xhr.send(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function put()&#123;</span><br><span class="line">        var data = &quot;symbol=999999&amp;code=sh999999&amp;name=This%20is%20an%20update%20test&amp;ipo_date=2017-070-7&quot;;</span><br><span class="line"></span><br><span class="line">        var xhr = new XMLHttpRequest();</span><br><span class="line"></span><br><span class="line">        xhr.addEventListener(&quot;readystatechange&quot;, function () &#123;</span><br><span class="line">          if (this.readyState === 4) &#123;</span><br><span class="line">            console.log(this.responseText);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        xhr.open(&quot;PUT&quot;, &quot;http://api.baojia.local/v1/stocks/3001&quot;);</span><br><span class="line">        xhr.setRequestHeader(&quot;content-type&quot;, &quot;application/x-www-form-urlencoded&quot;);</span><br><span class="line">        xhr.setRequestHeader(&quot;X-Custom-Header&quot;, &quot;my-custom-header&quot;);</span><br><span class="line"></span><br><span class="line">        xhr.send(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var x = 0;</span><br><span class="line"></span><br><span class="line">if( x === 0 )&#123;</span><br><span class="line">       getSameOrigin()</span><br><span class="line">&#125;else if( x === 1)&#123;</span><br><span class="line">     get();</span><br><span class="line">&#125;else if( x === 2)&#123;</span><br><span class="line">    post();</span><br><span class="line">&#125;</span><br><span class="line">else if( x === 3)&#123;</span><br><span class="line">    put();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="4-简单请求"><a href="#4-简单请求" class="headerlink" title="4 简单请求"></a>4 简单请求</h2><p>对于简单请求，浏览器直接发出CORS请求。具体来说，就是在头信息之中，增加一个Origin字段。</p>
+<h3 id="4-1-同源请求"><a href="#4-1-同源请求" class="headerlink" title="4.1 同源请求"></a>4.1 同源请求</h3><p>修改 index.html，设置 x = 0 ，刷新浏览器</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-6fb16ac5aeb140fa.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-24 11-55-15 的屏幕截图.png"></p>
+<h3 id="4-2-请求被拒绝"><a href="#4-2-请求被拒绝" class="headerlink" title="4.2 请求被拒绝"></a>4.2 请求被拒绝</h3><p>刷新浏览器，执行 GET 请求,发现请求头被自动添加了 Origin 字段。<br>Origin字段用来说明，本次请求来自哪个源（协议’+ 域名 + 端口）。服务器根据这个值，决定是否同意这次请求。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-91384fa4d1944d4a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-32-39 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-28bb8106fb07ffdd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-19-36 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-66231d8bf7ff81ac.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-20-57 的屏幕截图.png"></p>
+<p>对比同源请求，CORS请求多了一个 Origin 请求头，其他没有多大区别。Origin包含协议名、地址以及一个可选的端口，她是浏览器自动添加的，无法手动添加。</p>
+<p>请求被拒绝的情况下，CORS 响应头和普通请求响应头没有区别。</p>
+<h3 id="4-3-请求被允许"><a href="#4-3-请求被允许" class="headerlink" title="4.3 请求被允许"></a>4.3 请求被允许</h3><p>修改 StockController,添加允许的请求方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line"></span><br><span class="line">&apos;Access-Control-Request-Method&apos; =&gt; [&apos;GET&apos;],</span><br><span class="line"></span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<p> 刷新浏览器，重新访问 GET 请求</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-5fca0801599c5987.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-25-17 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-762c56c79194b72d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-23-56 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-227ea9651859d48c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-25-30 的屏幕截图.png"></p>
+<p>请求成功，响应头中会包含一些 以“Access-Control-”作为前缀的项目。</p>
+<p><strong>可能的响应字段有：</strong></p>
+<ol>
+<li><p>Access-Control-Allow-Origin(必须)<br>该字段是必须的。它的值要么是请求时Origin字段的值，要么是一个*，表示接受任意域名的请求。</p>
+</li>
+<li><p>Access-Control-Allow-Credentials(可选)<br>它的值是一个布尔值，表示是否允许发送Cookie。默认情况下，Cookie不包括在CORS请求之中。设为true，即表示服务器明确许可，Cookie可以包含在请求中，一起发给服务器。这个值也只能设为true，如果服务器不要浏览器发送Cookie，删除该字段即可。</p>
+</li>
+<li><p>Access-Control-Expose-Headers(可选)<br>CORS请求时，XMLHttpRequest对象的getResponseHeader()方法只能拿到6个基本字段：<br> <strong><em>Cache-Control | Content-Language | Content-Type | Expires | Last-Modified | Pragma</em></strong><br>如果想拿到其他字段，就必须在Access-Control-Expose-Headers里面指定，并以逗号进行分隔。</p>
+</li>
+</ol>
+<h3 id="4-3-结论"><a href="#4-3-结论" class="headerlink" title="4.3 结论"></a>4.3 结论</h3><h4 id="4-3-1-不在许可范围内"><a href="#4-3-1-不在许可范围内" class="headerlink" title="4.3.1 不在许可范围内"></a>4.3.1 不在许可范围内</h4><p>如果 Origin 指定的源，不在许可范围内，服务器会返回一个正常的HTTP回应。浏览器发现，这个回应的头信息没有包含Access-Control-Allow-Origin字段（详见下文），就知道出错了，从而抛出一个错误，被XMLHttpRequest的onerror回调函数捕获。注意，这种错误无法通过状态码识别，因为HTTP回应的状态码有可能是200。</p>
+<h4 id="4-3-2-在许可范围内"><a href="#4-3-2-在许可范围内" class="headerlink" title="4.3.2  在许可范围内"></a>4.3.2  在许可范围内</h4><p>如果Origin指定的域名在许可范围内，服务器返回的响应，会多出几个头信息字段。</p>
+<h2 id="5-非简单请求"><a href="#5-非简单请求" class="headerlink" title="5 非简单请求"></a>5 非简单请求</h2><h3 id="5-1-预检请求"><a href="#5-1-预检请求" class="headerlink" title="5.1 预检请求"></a>5.1 预检请求</h3><blockquote>
+<p>非简单请求是那种对服务器有特殊要求的请求，比如请求方法是PUT或DELETE，或者Content-Type字段的类型是application/json。</p>
+<p>非简单请求的CORS请求，会在正式通信之前，增加一次HTTP查询请求，称为”预检”请求（preflight）。</p>
+<p>浏览器先询问服务器，当前网页所在的域名是否在服务器的许可名单之中，以及可以使用哪些HTTP动词和头信息字段。只有得到肯定答复，浏览器才会发出正式的XMLHttpRequest请求，否则就报错。</p>
+</blockquote>
+<p>设置 js 变量 x = 3，刷新浏览器</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-a92c3dfb85885641.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-52-57 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-65a552696530b6ea.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-52-36 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-d245a46ae82e482b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-53-13 的屏幕截图.png"></p>
+<p>可以看到只发送了一个 OPTIONS 请求，没有发起 PUT 请求，原因是响应头 Access-Control-Allow-Methods 没有包含 PUT 方法。</p>
+<blockquote>
+<p> <strong>预检请求以 OPTIONS 方法发送，请求中包含：</strong></p>
+<ol>
+<li><p>Origin： 表示请求来自哪个源。</p>
+</li>
+<li><p>Access-Control-Request-Method – 该项内容是实际请求的种类，可以是GET、POST之类的简单请求，也可以是PUT、DELETE等等。</p>
+</li>
+<li><p>Access-Control-Request-Headers – 该项是一个以逗号分隔的列表，当中是复杂请求所使用的头部。</p>
+</li>
+</ol>
+</blockquote>
+<hr>
+<blockquote>
+<p> <strong>预检请求可能的响应头：</strong></p>
+</blockquote>
+<blockquote>
+<ol>
+<li><p>Access-Control-Allow-Origin（必含）<br>和简单请求一样的，必须包含一个域。</p>
+</li>
+<li><p>Access-Control-Allow-Methods（必含）<br>这是对预请求当中Access-Control-Request-Method的回复，这一回复将是一个以逗号分隔的列表。尽管客户端或许只请求某一方法，但服务端仍然可以返回所有允许的方法，以便客户端将其缓存。</p>
+</li>
+<li><p>Access-Control-Allow-Headers（当预请求中包含Access-Control-Request-Headers时必须包含）<br>这是对预请求当中Access-Control-Request-Headers的回复，和上面一样是以逗号分隔的列表，可以返回所有支持的头部。</p>
+</li>
+<li><p>Access-Control-Allow-Credentials（可选）<br>和简单请求当中作用相同。</p>
+</li>
+<li><p>Access-Control-Max-Age（可选）<br>以秒为单位的缓存时间。预请求的的发送并非免费午餐，允许时应当尽可能缓存。</p>
+</li>
+</ol>
+</blockquote>
+<h3 id="5-2-预检请求的响应"><a href="#5-2-预检请求的响应" class="headerlink" title="5.2 预检请求的响应"></a>5.2 预检请求的响应</h3><h4 id="5-2-1-修改-StockController-在响应头-Access-Control-Allow-Methods-包含-PUT-方法"><a href="#5-2-1-修改-StockController-在响应头-Access-Control-Allow-Methods-包含-PUT-方法" class="headerlink" title="5.2.1 修改 StockController,在响应头 Access-Control-Allow-Methods: 包含 PUT 方法"></a>5.2.1 修改 StockController,在响应头 Access-Control-Allow-Methods: 包含 PUT 方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&apos;Access-Control-Request-Method&apos; =&gt; [&apos;GET&apos;,&apos;PUT&apos;],</span><br></pre></td></tr></table></figure>
+<h4 id="5-2-2-刷新浏览器，重新发起-PUT-请求"><a href="#5-2-2-刷新浏览器，重新发起-PUT-请求" class="headerlink" title="5.2.2 刷新浏览器，重新发起 PUT 请求"></a>5.2.2 刷新浏览器，重新发起 PUT 请求</h4><p>可以看到浏览器先执行 OPTIONS 请求，然后再执行 PUT 请求，两个请求都成功了，原因是 OPTIONS 请求的响应头 Access-Control-Allow-Methods 中包含 PUT 方法。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-d1b0c56646bbc0fb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-05-29 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-a541532aacb7ef9b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-05-15 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-b5e7803e09cf97c5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-06-49 的屏幕截图.png"></p>
+<h3 id="5-3-浏览器的正常请求和响应"><a href="#5-3-浏览器的正常请求和响应" class="headerlink" title="5.3 浏览器的正常请求和响应"></a>5.3 浏览器的正常请求和响应</h3><p>一旦服务器通过了”预检”请求，以后每次浏览器正常的CORS请求，就都跟简单请求一样，会有一个Origin头信息字段。服务器的回应，也都会有一个Access-Control-Allow-Origin头信息字段。</p>
+<p>PUT 请求</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-845efb543507c091.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-07-04 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-23062697d449a157.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-07-12 的屏幕截图.png"></p>
+<h2 id="6-参考"><a href="#6-参考" class="headerlink" title="6 参考"></a>6 参考</h2><p><a href="http://www.ruanyifeng.com/blog/2016/04/cors.html" target="_blank" rel="noopener">跨域资源共享 CORS 详解</a><br><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests" target="_blank" rel="noopener">HTTP access control (CORS)</a><br><a href="http://blog.csdn.net/u014344668/article/details/54948546" target="_blank" rel="noopener">CORS——跨域请求那些事儿</a><br><a href="http://newhtml.net/using-cors/" target="_blank" rel="noopener">利用CORS实现跨域请求</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/" data-id="cjfdvevu20005n8npucjojpkg" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Yii2 Restful 跨域调用 - CORS 过滤器</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/">Yii2 Restful 跨域调用 - CORS 详解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/">Yii2 Restful 跨域调用 - CORS 过滤器</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-实现登陆验证/">Yii2 Restful 实现登陆验证</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-自定义方法/">Yii2 Restful 自定义方法</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-文件上传/">Yii2 Restful  文件上传</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 risen<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Yii2 Restful 跨域调用 - CORS 过滤器 | Risen的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1 CORS 简介跨域资源共享（Cross-origin resource sharing CORS）允许一个网站从其他域(domain) 请求资源。 正常情况下，由于同源安全策略(same origin security policy),跨域资源访问请求(cross-domain resourse requests) 会被浏览器禁止。CORS 定义了一种 Browser和 Server 协同来决">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Yii2 Restful 跨域调用 - CORS 过滤器">
+<meta property="og:url" content="http://yoursite.com/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/index.html">
+<meta property="og:site_name" content="Risen的博客">
+<meta property="og:description" content="1 CORS 简介跨域资源共享（Cross-origin resource sharing CORS）允许一个网站从其他域(domain) 请求资源。 正常情况下，由于同源安全策略(same origin security policy),跨域资源访问请求(cross-domain resourse requests) 会被浏览器禁止。CORS 定义了一种 Browser和 Server 协同来决">
+<meta property="og:updated_time" content="2018-03-30T11:20:25.816Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Yii2 Restful 跨域调用 - CORS 过滤器">
+<meta name="twitter:description" content="1 CORS 简介跨域资源共享（Cross-origin resource sharing CORS）允许一个网站从其他域(domain) 请求资源。 正常情况下，由于同源安全策略(same origin security policy),跨域资源访问请求(cross-domain resourse requests) 会被浏览器禁止。CORS 定义了一种 Browser和 Server 协同来决">
+  
+    <link rel="alternate" href="/atom.xml" title="Risen的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Risen的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Yii2-Restful-跨域调用-CORS-过滤器" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/" class="article-date">
+  <time datetime="2018-03-30T11:20:08.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Yii2 Restful 跨域调用 - CORS 过滤器
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-CORS-简介"><a href="#1-CORS-简介" class="headerlink" title="1 CORS 简介"></a>1 CORS 简介</h2><p>跨域资源共享（Cross-origin resource sharing CORS）允许一个网站从其他域(domain) 请求资源。</p>
+<p>正常情况下，由于同源安全策略(same origin security policy),跨域资源访问请求(cross-domain resourse requests) 会被浏览器禁止。CORS 定义了一种 Browser和 Server 协同来决定是否允许跨域请求。</p>
+<h2 id="2-Yii2-实现-CORS"><a href="#2-Yii2-实现-CORS" class="headerlink" title="2  Yii2 实现 CORS"></a>2  Yii2 实现 CORS</h2><h3 id="2-1-使用默认设置"><a href="#2-1-使用默认设置" class="headerlink" title="2.1 使用默认设置"></a>2.1 使用默认设置</h3><p>yii\filters\Cors 过滤器可以用来帮助 Yii2 配置是否允许跨域请求。<br>Cors 过滤器必须在 Authentication / Authorization filters之前，保证 CORS headers 总是被发送给浏览器。</p>
+<p>在Controller 中添加如下代码即可</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">use yii\filters\auth\HttpBasicAuth;</span><br><span class="line"></span><br><span class="line">public function behaviors()</span><br><span class="line">&#123;</span><br><span class="line">    $behaviors = parent::behaviors();</span><br><span class="line"></span><br><span class="line">    // remove authentication filter</span><br><span class="line">    $auth = $behaviors[&apos;authenticator&apos;];</span><br><span class="line">    unset($behaviors[&apos;authenticator&apos;]);</span><br><span class="line"></span><br><span class="line">    // add CORS filter</span><br><span class="line">    $behaviors[&apos;corsFilter&apos;] = [</span><br><span class="line">        &apos;class&apos; =&gt; \yii\filters\Cors::className(),</span><br><span class="line">    ];</span><br><span class="line"></span><br><span class="line">    // re-add authentication filter</span><br><span class="line">    $behaviors[&apos;authenticator&apos;] = $auth;</span><br><span class="line">    // avoid authentication on CORS-pre-flight requests (HTTP OPTIONS method)</span><br><span class="line">    $behaviors[&apos;authenticator&apos;][&apos;except&apos;] = [&apos;options&apos;];</span><br><span class="line"></span><br><span class="line">    return $behaviors;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面代码将使用默认 $cors 设置。</p>
+<p>$cors 默认值<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public $cors = [</span><br><span class="line">        &apos;Origin&apos; =&gt; [&apos;*&apos;],</span><br><span class="line">        &apos;Access-Control-Request-Method&apos; =&gt; [&apos;GET&apos;, &apos;POST&apos;, &apos;PUT&apos;, &apos;PATCH&apos;, &apos;DELETE&apos;, &apos;HEAD&apos;, &apos;OPTIONS&apos;],</span><br><span class="line">        &apos;Access-Control-Request-Headers&apos; =&gt; [&apos;*&apos;],</span><br><span class="line">        &apos;Access-Control-Allow-Credentials&apos; =&gt; null,</span><br><span class="line">        &apos;Access-Control-Max-Age&apos; =&gt; 86400,</span><br><span class="line">        &apos;Access-Control-Expose-Headers&apos; =&gt; [],</span><br><span class="line">    ];</span><br></pre></td></tr></table></figure></p>
+<p>*<em>1. cors[‘Origin’]: 允许的源. [‘</em>‘] (所有都允许) 或者 [‘<a href="http://www.myserver.net&#39;" target="_blank" rel="noopener">http://www.myserver.net&#39;</a>, ‘<a href="http://www.myotherserver.com&#39;]。" target="_blank" rel="noopener">http://www.myotherserver.com&#39;]。</a> 默认 [‘*’]。</p>
+<ol>
+<li>cors[‘Access-Control-Request-Method’]: 允许的动词，比如 [‘GET’, ‘OPTIONS’, ‘HEAD’]. 默认 [‘GET’, ‘POST’, ‘PUT’, ‘PATCH’, ‘DELETE’, ‘HEAD’, ‘OPTIONS’]。</li>
+<li>cors[‘Access-Control-Request-Headers’]: 允许的请求头。  [‘<em>‘] 所有请求头都允许或者具体指定 [‘X-Request-With’].默认[‘</em>‘].</li>
+<li>cors[‘Access-Control-Allow-Credentials’]: 是否允许使用 credentials。 允许的值 true, false or null ，默认 null.</li>
+<li>cors[‘Access-Control-Max-Age’]: pre-flight 请求的生命周期。默认 86400.**</li>
+</ol>
+<h3 id="2-2-使用自定义设置"><a href="#2-2-使用自定义设置" class="headerlink" title="2.2 使用自定义设置"></a>2.2 使用自定义设置</h3><p>Cors 过滤器可以使用$cors属性来调整响应头。</p>
+<p>代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">public function behaviors()</span><br><span class="line">&#123;</span><br><span class="line">    return [</span><br><span class="line">        &apos;corsFilter&apos; =&gt; [</span><br><span class="line">            &apos;class&apos; =&gt; \yii\filters\Cors::className(),</span><br><span class="line">            &apos;cors&apos; =&gt; [</span><br><span class="line">                // restrict access to</span><br><span class="line">                &apos;Origin&apos; =&gt; [&apos;http://www.myserver.com&apos;, &apos;https://www.myserver.com&apos;],</span><br><span class="line">                &apos;Access-Control-Request-Method&apos; =&gt; [&apos;POST&apos;, &apos;PUT&apos;],</span><br><span class="line">                // Allow only POST and PUT methods</span><br><span class="line">                &apos;Access-Control-Request-Headers&apos; =&gt; [&apos;X-Wsse&apos;],</span><br><span class="line">                // Allow only headers &apos;X-Wsse&apos;</span><br><span class="line">                &apos;Access-Control-Allow-Credentials&apos; =&gt; true,</span><br><span class="line">                // Allow OPTIONS caching</span><br><span class="line">                &apos;Access-Control-Max-Age&apos; =&gt; 3600,</span><br><span class="line">                // Allow the X-Pagination-Current-Page header to be exposed to the browser.</span><br><span class="line">                &apos;Access-Control-Expose-Headers&apos; =&gt; [&apos;X-Pagination-Current-Page&apos;],</span><br><span class="line">            ],</span><br><span class="line"></span><br><span class="line">        ],</span><br><span class="line">    ];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-3-为特定-action-设置响应头"><a href="#2-3-为特定-action-设置响应头" class="headerlink" title="2.3  为特定 action 设置响应头"></a>2.3  为特定 action 设置响应头</h3><p>可以使用 $actions 属性为特定 action 调整 CORS 响应头，她会覆盖 $cors 上的相同设置。比如为 actionLogin 添加 Control-Allow-Credentials<br>代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public function behaviors()</span><br><span class="line">&#123;</span><br><span class="line">    return ArrayHelper::merge([</span><br><span class="line">        [</span><br><span class="line">            &apos;class&apos; =&gt; Cors::className(),</span><br><span class="line">            &apos;cors&apos; =&gt; [</span><br><span class="line">                &apos;Origin&apos; =&gt; [&apos;http://www.myserver.net&apos;],</span><br><span class="line">                &apos;Access-Control-Request-Method&apos; =&gt; [&apos;GET&apos;, &apos;HEAD&apos;, &apos;OPTIONS&apos;],</span><br><span class="line">            ],</span><br><span class="line">            &apos;actions&apos; =&gt; [</span><br><span class="line">                &apos;login&apos; =&gt; [</span><br><span class="line">                    &apos;Access-Control-Allow-Credentials&apos; =&gt; true,</span><br><span class="line">                ]</span><br><span class="line">            ]</span><br><span class="line">        ],</span><br><span class="line">    ], parent::behaviors());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="3-参考"><a href="#3-参考" class="headerlink" title="3 参考"></a>3 参考</h2><p>[Cors][1]<br> [1]: <a href="http://www.yiiframework.com/doc-2.0/guide-structure-filters.html#cors" target="_blank" rel="noopener">http://www.yiiframework.com/doc-2.0/guide-structure-filters.html#cors</a></p>
+<p><a href="http://www.yiiframework.com/doc-2.0/guide-rest-controllers.html" target="_blank" rel="noopener">guide-rest-controllers</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/" data-id="cjfdvevu20006n8np7td0hyb1" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Yii2 Restful 跨域调用 - CORS 详解
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/03/30/Yii2-Restful-实现登陆验证/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Yii2 Restful 实现登陆验证</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/">Yii2 Restful 跨域调用 - CORS 详解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/">Yii2 Restful 跨域调用 - CORS 过滤器</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-实现登陆验证/">Yii2 Restful 实现登陆验证</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-自定义方法/">Yii2 Restful 自定义方法</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-文件上传/">Yii2 Restful  文件上传</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 risen<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

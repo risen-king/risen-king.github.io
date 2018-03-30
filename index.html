@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Risen的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Risen的博客">
+<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:site_name" content="Risen的博客">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Risen的博客">
+  
+    <link rel="alternate" href="/atom.xml" title="Risen的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Risen的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-Yii2-Restful-跨域调用-CORS-详解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/" class="article-date">
+  <time datetime="2018-03-30T11:20:55.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/">Yii2 Restful 跨域调用 - CORS 详解</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-什么是CORS"><a href="#1-什么是CORS" class="headerlink" title="1 什么是CORS"></a>1 什么是CORS</h2><p>CORS是一个W3C标准，全称是”跨域资源共享”（Cross-origin resource sharing）。</p>
+<p>它允许浏览器向跨源服务器发出XMLHttpRequest请求，从而绕过AJAX的同源策略(Same-origin Policy)<br>那么什么是Same-origin Policy呢？简单地说，在一个浏览器中访问的网站不能访问另一个网站中的数据，除非这两个网站具有相同的Origin，也即是拥有相同的协议、主机地址以及端口。一旦这三项数据中有一项不同，那么该资源就将被认为是从不同的Origin得来的，进而不被允许访问。</p>
+<h2 id="2-CORS-请求分类"><a href="#2-CORS-请求分类" class="headerlink" title="2 CORS 请求分类"></a>2 CORS 请求分类</h2><p>浏览器将CORS请求分成两类：简单请求（simple request）和非简单请求（not-so-simple request）。</p>
+<p>只要同时满足以下两大条件，就属于简单请求。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1 请求方法是以下三种方法之一 ：GET |  POST | HEAD</span><br><span class="line"></span><br><span class="line">2 HTTP 的头信息不超出以下几种字段：</span><br><span class="line">    Accept</span><br><span class="line">    Accept-Language</span><br><span class="line">    Content-Language</span><br><span class="line">    Content-Type （只限于三个值 application/x-www-form-urlencoded | multipart/form-data | text/plain ）</span><br><span class="line">    Last-Event-ID</span><br></pre></td></tr></table></figure>
+<p>凡是不同时满足上面两个条件，就属于非简单请求。</p>
+<p>浏览器对这两种请求的处理，是不一样的。</p>
+<h2 id="3-准备测试环境"><a href="#3-准备测试环境" class="headerlink" title="3 准备测试环境"></a>3 准备测试环境</h2><h4 id="3-1-新建-Stock-Api"><a href="#3-1-新建-Stock-Api" class="headerlink" title="3.1 新建 Stock Api"></a>3.1 新建 Stock Api</h4><h4 id="3-2-添加-Cors-过滤器"><a href="#3-2-添加-Cors-过滤器" class="headerlink" title="3.2 添加 Cors 过滤器"></a>3.2 添加 Cors 过滤器</h4><p>打开 StockController,修改代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace api\modules\v1\controllers;</span><br><span class="line"></span><br><span class="line">use yii\filters\Cors;</span><br><span class="line">use yii\helpers\ArrayHelper;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">use yii\rest\ActiveController;</span><br><span class="line"></span><br><span class="line">class  StockController  extends ActiveController</span><br><span class="line">&#123;</span><br><span class="line">    public $modelClass = &apos;api\models\Stock&apos;;</span><br><span class="line"></span><br><span class="line">    public function behaviors()</span><br><span class="line">    &#123;</span><br><span class="line">          return ArrayHelper::merge([</span><br><span class="line">                [</span><br><span class="line">                        &apos;class&apos; =&gt; Cors::className(),</span><br><span class="line">                        &apos;cors&apos; =&gt; [</span><br><span class="line">                            &apos;Origin&apos; =&gt; [&apos;http://test.local&apos;],</span><br><span class="line">                            &apos;Access-Control-Request-Method&apos; =&gt; [],</span><br><span class="line">                            &apos;Access-Control-Request-Headers&apos;=&gt;[&apos;*&apos;]</span><br><span class="line">                        ],</span><br><span class="line"></span><br><span class="line">                ],</span><br><span class="line">        ], parent::behaviors());</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-3-新建测试站点-test-local"><a href="#3-3-新建测试站点-test-local" class="headerlink" title="3.3 新建测试站点 test.local"></a>3.3 新建测试站点 test.local</h4><p>添加数据文件 data.json</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;name&quot;: &quot;ahcj&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>添加文件 index.html</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge,chrome=1&quot;&gt;</span><br><span class="line">&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html;charset=utf-8&quot;&gt;</span><br><span class="line"></span><br><span class="line">&lt;title&gt;CORS TEST&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line"></span><br><span class="line">&lt;body id=&quot;body&quot;&gt;</span><br><span class="line">Please look at the Console and Network pannel ......</span><br><span class="line">&lt;/body&gt;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line"></span><br><span class="line">function getSameOrigin()&#123;</span><br><span class="line"></span><br><span class="line">        var data = null;</span><br><span class="line"></span><br><span class="line">        var xhr = new XMLHttpRequest();</span><br><span class="line"></span><br><span class="line">        xhr.addEventListener(&quot;readystatechange&quot;, function () &#123;</span><br><span class="line">            if (this.readyState === 4) &#123;</span><br><span class="line"></span><br><span class="line">                console.log(this.responseText);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        xhr.open(&quot;GET&quot;, &quot;data.json&quot;);</span><br><span class="line"></span><br><span class="line">        xhr.send(data);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function get()&#123;</span><br><span class="line"></span><br><span class="line">        var data = null;</span><br><span class="line"></span><br><span class="line">        var xhr = new XMLHttpRequest();</span><br><span class="line"></span><br><span class="line">        xhr.addEventListener(&quot;readystatechange&quot;, function () &#123;</span><br><span class="line">            if (this.readyState === 4) &#123;</span><br><span class="line"></span><br><span class="line">                console.log(this.responseText);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        xhr.open(&quot;GET&quot;, &quot;http://api.baojia.local/v1/stocks/3001&quot;);</span><br><span class="line"></span><br><span class="line">        xhr.send(data);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function post()&#123;</span><br><span class="line">    var data = &quot;symbol=999999&amp;code=sh999999&amp;name=This%20is%20a%20test&amp;ipo_date=2017-070-7&quot;;</span><br><span class="line"></span><br><span class="line">    var xhr = new XMLHttpRequest();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    xhr.addEventListener(&quot;readystatechange&quot;, function () &#123;</span><br><span class="line">        if (this.readyState === 4) &#123;</span><br><span class="line">                console.log(this.responseText);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    xhr.open(&quot;POST&quot;, &quot;http://api.baojia.local/v1/stocks&quot;);</span><br><span class="line">    xhr.setRequestHeader(&quot;content-type&quot;, &quot;application/x-www-form-urlencoded&quot;);</span><br><span class="line"></span><br><span class="line">    xhr.send(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function put()&#123;</span><br><span class="line">        var data = &quot;symbol=999999&amp;code=sh999999&amp;name=This%20is%20an%20update%20test&amp;ipo_date=2017-070-7&quot;;</span><br><span class="line"></span><br><span class="line">        var xhr = new XMLHttpRequest();</span><br><span class="line"></span><br><span class="line">        xhr.addEventListener(&quot;readystatechange&quot;, function () &#123;</span><br><span class="line">          if (this.readyState === 4) &#123;</span><br><span class="line">            console.log(this.responseText);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        xhr.open(&quot;PUT&quot;, &quot;http://api.baojia.local/v1/stocks/3001&quot;);</span><br><span class="line">        xhr.setRequestHeader(&quot;content-type&quot;, &quot;application/x-www-form-urlencoded&quot;);</span><br><span class="line">        xhr.setRequestHeader(&quot;X-Custom-Header&quot;, &quot;my-custom-header&quot;);</span><br><span class="line"></span><br><span class="line">        xhr.send(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var x = 0;</span><br><span class="line"></span><br><span class="line">if( x === 0 )&#123;</span><br><span class="line">       getSameOrigin()</span><br><span class="line">&#125;else if( x === 1)&#123;</span><br><span class="line">     get();</span><br><span class="line">&#125;else if( x === 2)&#123;</span><br><span class="line">    post();</span><br><span class="line">&#125;</span><br><span class="line">else if( x === 3)&#123;</span><br><span class="line">    put();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="4-简单请求"><a href="#4-简单请求" class="headerlink" title="4 简单请求"></a>4 简单请求</h2><p>对于简单请求，浏览器直接发出CORS请求。具体来说，就是在头信息之中，增加一个Origin字段。</p>
+<h3 id="4-1-同源请求"><a href="#4-1-同源请求" class="headerlink" title="4.1 同源请求"></a>4.1 同源请求</h3><p>修改 index.html，设置 x = 0 ，刷新浏览器</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-6fb16ac5aeb140fa.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-24 11-55-15 的屏幕截图.png"></p>
+<h3 id="4-2-请求被拒绝"><a href="#4-2-请求被拒绝" class="headerlink" title="4.2 请求被拒绝"></a>4.2 请求被拒绝</h3><p>刷新浏览器，执行 GET 请求,发现请求头被自动添加了 Origin 字段。<br>Origin字段用来说明，本次请求来自哪个源（协议’+ 域名 + 端口）。服务器根据这个值，决定是否同意这次请求。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-91384fa4d1944d4a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-32-39 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-28bb8106fb07ffdd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-19-36 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-66231d8bf7ff81ac.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-20-57 的屏幕截图.png"></p>
+<p>对比同源请求，CORS请求多了一个 Origin 请求头，其他没有多大区别。Origin包含协议名、地址以及一个可选的端口，她是浏览器自动添加的，无法手动添加。</p>
+<p>请求被拒绝的情况下，CORS 响应头和普通请求响应头没有区别。</p>
+<h3 id="4-3-请求被允许"><a href="#4-3-请求被允许" class="headerlink" title="4.3 请求被允许"></a>4.3 请求被允许</h3><p>修改 StockController,添加允许的请求方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line"></span><br><span class="line">&apos;Access-Control-Request-Method&apos; =&gt; [&apos;GET&apos;],</span><br><span class="line"></span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+<p> 刷新浏览器，重新访问 GET 请求</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-5fca0801599c5987.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-25-17 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-762c56c79194b72d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-23-56 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-227ea9651859d48c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-25-30 的屏幕截图.png"></p>
+<p>请求成功，响应头中会包含一些 以“Access-Control-”作为前缀的项目。</p>
+<p><strong>可能的响应字段有：</strong></p>
+<ol>
+<li><p>Access-Control-Allow-Origin(必须)<br>该字段是必须的。它的值要么是请求时Origin字段的值，要么是一个*，表示接受任意域名的请求。</p>
+</li>
+<li><p>Access-Control-Allow-Credentials(可选)<br>它的值是一个布尔值，表示是否允许发送Cookie。默认情况下，Cookie不包括在CORS请求之中。设为true，即表示服务器明确许可，Cookie可以包含在请求中，一起发给服务器。这个值也只能设为true，如果服务器不要浏览器发送Cookie，删除该字段即可。</p>
+</li>
+<li><p>Access-Control-Expose-Headers(可选)<br>CORS请求时，XMLHttpRequest对象的getResponseHeader()方法只能拿到6个基本字段：<br> <strong><em>Cache-Control | Content-Language | Content-Type | Expires | Last-Modified | Pragma</em></strong><br>如果想拿到其他字段，就必须在Access-Control-Expose-Headers里面指定，并以逗号进行分隔。</p>
+</li>
+</ol>
+<h3 id="4-3-结论"><a href="#4-3-结论" class="headerlink" title="4.3 结论"></a>4.3 结论</h3><h4 id="4-3-1-不在许可范围内"><a href="#4-3-1-不在许可范围内" class="headerlink" title="4.3.1 不在许可范围内"></a>4.3.1 不在许可范围内</h4><p>如果 Origin 指定的源，不在许可范围内，服务器会返回一个正常的HTTP回应。浏览器发现，这个回应的头信息没有包含Access-Control-Allow-Origin字段（详见下文），就知道出错了，从而抛出一个错误，被XMLHttpRequest的onerror回调函数捕获。注意，这种错误无法通过状态码识别，因为HTTP回应的状态码有可能是200。</p>
+<h4 id="4-3-2-在许可范围内"><a href="#4-3-2-在许可范围内" class="headerlink" title="4.3.2  在许可范围内"></a>4.3.2  在许可范围内</h4><p>如果Origin指定的域名在许可范围内，服务器返回的响应，会多出几个头信息字段。</p>
+<h2 id="5-非简单请求"><a href="#5-非简单请求" class="headerlink" title="5 非简单请求"></a>5 非简单请求</h2><h3 id="5-1-预检请求"><a href="#5-1-预检请求" class="headerlink" title="5.1 预检请求"></a>5.1 预检请求</h3><blockquote>
+<p>非简单请求是那种对服务器有特殊要求的请求，比如请求方法是PUT或DELETE，或者Content-Type字段的类型是application/json。</p>
+<p>非简单请求的CORS请求，会在正式通信之前，增加一次HTTP查询请求，称为”预检”请求（preflight）。</p>
+<p>浏览器先询问服务器，当前网页所在的域名是否在服务器的许可名单之中，以及可以使用哪些HTTP动词和头信息字段。只有得到肯定答复，浏览器才会发出正式的XMLHttpRequest请求，否则就报错。</p>
+</blockquote>
+<p>设置 js 变量 x = 3，刷新浏览器</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-a92c3dfb85885641.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-52-57 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-65a552696530b6ea.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-52-36 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-d245a46ae82e482b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 17-53-13 的屏幕截图.png"></p>
+<p>可以看到只发送了一个 OPTIONS 请求，没有发起 PUT 请求，原因是响应头 Access-Control-Allow-Methods 没有包含 PUT 方法。</p>
+<blockquote>
+<p> <strong>预检请求以 OPTIONS 方法发送，请求中包含：</strong></p>
+<ol>
+<li><p>Origin： 表示请求来自哪个源。</p>
+</li>
+<li><p>Access-Control-Request-Method – 该项内容是实际请求的种类，可以是GET、POST之类的简单请求，也可以是PUT、DELETE等等。</p>
+</li>
+<li><p>Access-Control-Request-Headers – 该项是一个以逗号分隔的列表，当中是复杂请求所使用的头部。</p>
+</li>
+</ol>
+</blockquote>
+<hr>
+<blockquote>
+<p> <strong>预检请求可能的响应头：</strong></p>
+</blockquote>
+<blockquote>
+<ol>
+<li><p>Access-Control-Allow-Origin（必含）<br>和简单请求一样的，必须包含一个域。</p>
+</li>
+<li><p>Access-Control-Allow-Methods（必含）<br>这是对预请求当中Access-Control-Request-Method的回复，这一回复将是一个以逗号分隔的列表。尽管客户端或许只请求某一方法，但服务端仍然可以返回所有允许的方法，以便客户端将其缓存。</p>
+</li>
+<li><p>Access-Control-Allow-Headers（当预请求中包含Access-Control-Request-Headers时必须包含）<br>这是对预请求当中Access-Control-Request-Headers的回复，和上面一样是以逗号分隔的列表，可以返回所有支持的头部。</p>
+</li>
+<li><p>Access-Control-Allow-Credentials（可选）<br>和简单请求当中作用相同。</p>
+</li>
+<li><p>Access-Control-Max-Age（可选）<br>以秒为单位的缓存时间。预请求的的发送并非免费午餐，允许时应当尽可能缓存。</p>
+</li>
+</ol>
+</blockquote>
+<h3 id="5-2-预检请求的响应"><a href="#5-2-预检请求的响应" class="headerlink" title="5.2 预检请求的响应"></a>5.2 预检请求的响应</h3><h4 id="5-2-1-修改-StockController-在响应头-Access-Control-Allow-Methods-包含-PUT-方法"><a href="#5-2-1-修改-StockController-在响应头-Access-Control-Allow-Methods-包含-PUT-方法" class="headerlink" title="5.2.1 修改 StockController,在响应头 Access-Control-Allow-Methods: 包含 PUT 方法"></a>5.2.1 修改 StockController,在响应头 Access-Control-Allow-Methods: 包含 PUT 方法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&apos;Access-Control-Request-Method&apos; =&gt; [&apos;GET&apos;,&apos;PUT&apos;],</span><br></pre></td></tr></table></figure>
+<h4 id="5-2-2-刷新浏览器，重新发起-PUT-请求"><a href="#5-2-2-刷新浏览器，重新发起-PUT-请求" class="headerlink" title="5.2.2 刷新浏览器，重新发起 PUT 请求"></a>5.2.2 刷新浏览器，重新发起 PUT 请求</h4><p>可以看到浏览器先执行 OPTIONS 请求，然后再执行 PUT 请求，两个请求都成功了，原因是 OPTIONS 请求的响应头 Access-Control-Allow-Methods 中包含 PUT 方法。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-d1b0c56646bbc0fb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-05-29 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-a541532aacb7ef9b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-05-15 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-b5e7803e09cf97c5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-06-49 的屏幕截图.png"></p>
+<h3 id="5-3-浏览器的正常请求和响应"><a href="#5-3-浏览器的正常请求和响应" class="headerlink" title="5.3 浏览器的正常请求和响应"></a>5.3 浏览器的正常请求和响应</h3><p>一旦服务器通过了”预检”请求，以后每次浏览器正常的CORS请求，就都跟简单请求一样，会有一个Origin头信息字段。服务器的回应，也都会有一个Access-Control-Allow-Origin头信息字段。</p>
+<p>PUT 请求</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-845efb543507c091.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-07-04 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-23062697d449a157.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 18-07-12 的屏幕截图.png"></p>
+<h2 id="6-参考"><a href="#6-参考" class="headerlink" title="6 参考"></a>6 参考</h2><p><a href="http://www.ruanyifeng.com/blog/2016/04/cors.html" target="_blank" rel="noopener">跨域资源共享 CORS 详解</a><br><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests" target="_blank" rel="noopener">HTTP access control (CORS)</a><br><a href="http://blog.csdn.net/u014344668/article/details/54948546" target="_blank" rel="noopener">CORS——跨域请求那些事儿</a><br><a href="http://newhtml.net/using-cors/" target="_blank" rel="noopener">利用CORS实现跨域请求</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/" data-id="cjfdvevu20005n8npucjojpkg" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Yii2-Restful-跨域调用-CORS-过滤器" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/" class="article-date">
+  <time datetime="2018-03-30T11:20:08.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/">Yii2 Restful 跨域调用 - CORS 过滤器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-CORS-简介"><a href="#1-CORS-简介" class="headerlink" title="1 CORS 简介"></a>1 CORS 简介</h2><p>跨域资源共享（Cross-origin resource sharing CORS）允许一个网站从其他域(domain) 请求资源。</p>
+<p>正常情况下，由于同源安全策略(same origin security policy),跨域资源访问请求(cross-domain resourse requests) 会被浏览器禁止。CORS 定义了一种 Browser和 Server 协同来决定是否允许跨域请求。</p>
+<h2 id="2-Yii2-实现-CORS"><a href="#2-Yii2-实现-CORS" class="headerlink" title="2  Yii2 实现 CORS"></a>2  Yii2 实现 CORS</h2><h3 id="2-1-使用默认设置"><a href="#2-1-使用默认设置" class="headerlink" title="2.1 使用默认设置"></a>2.1 使用默认设置</h3><p>yii\filters\Cors 过滤器可以用来帮助 Yii2 配置是否允许跨域请求。<br>Cors 过滤器必须在 Authentication / Authorization filters之前，保证 CORS headers 总是被发送给浏览器。</p>
+<p>在Controller 中添加如下代码即可</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">use yii\filters\auth\HttpBasicAuth;</span><br><span class="line"></span><br><span class="line">public function behaviors()</span><br><span class="line">&#123;</span><br><span class="line">    $behaviors = parent::behaviors();</span><br><span class="line"></span><br><span class="line">    // remove authentication filter</span><br><span class="line">    $auth = $behaviors[&apos;authenticator&apos;];</span><br><span class="line">    unset($behaviors[&apos;authenticator&apos;]);</span><br><span class="line"></span><br><span class="line">    // add CORS filter</span><br><span class="line">    $behaviors[&apos;corsFilter&apos;] = [</span><br><span class="line">        &apos;class&apos; =&gt; \yii\filters\Cors::className(),</span><br><span class="line">    ];</span><br><span class="line"></span><br><span class="line">    // re-add authentication filter</span><br><span class="line">    $behaviors[&apos;authenticator&apos;] = $auth;</span><br><span class="line">    // avoid authentication on CORS-pre-flight requests (HTTP OPTIONS method)</span><br><span class="line">    $behaviors[&apos;authenticator&apos;][&apos;except&apos;] = [&apos;options&apos;];</span><br><span class="line"></span><br><span class="line">    return $behaviors;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面代码将使用默认 $cors 设置。</p>
+<p>$cors 默认值<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public $cors = [</span><br><span class="line">        &apos;Origin&apos; =&gt; [&apos;*&apos;],</span><br><span class="line">        &apos;Access-Control-Request-Method&apos; =&gt; [&apos;GET&apos;, &apos;POST&apos;, &apos;PUT&apos;, &apos;PATCH&apos;, &apos;DELETE&apos;, &apos;HEAD&apos;, &apos;OPTIONS&apos;],</span><br><span class="line">        &apos;Access-Control-Request-Headers&apos; =&gt; [&apos;*&apos;],</span><br><span class="line">        &apos;Access-Control-Allow-Credentials&apos; =&gt; null,</span><br><span class="line">        &apos;Access-Control-Max-Age&apos; =&gt; 86400,</span><br><span class="line">        &apos;Access-Control-Expose-Headers&apos; =&gt; [],</span><br><span class="line">    ];</span><br></pre></td></tr></table></figure></p>
+<p>*<em>1. cors[‘Origin’]: 允许的源. [‘</em>‘] (所有都允许) 或者 [‘<a href="http://www.myserver.net&#39;" target="_blank" rel="noopener">http://www.myserver.net&#39;</a>, ‘<a href="http://www.myotherserver.com&#39;]。" target="_blank" rel="noopener">http://www.myotherserver.com&#39;]。</a> 默认 [‘*’]。</p>
+<ol>
+<li>cors[‘Access-Control-Request-Method’]: 允许的动词，比如 [‘GET’, ‘OPTIONS’, ‘HEAD’]. 默认 [‘GET’, ‘POST’, ‘PUT’, ‘PATCH’, ‘DELETE’, ‘HEAD’, ‘OPTIONS’]。</li>
+<li>cors[‘Access-Control-Request-Headers’]: 允许的请求头。  [‘<em>‘] 所有请求头都允许或者具体指定 [‘X-Request-With’].默认[‘</em>‘].</li>
+<li>cors[‘Access-Control-Allow-Credentials’]: 是否允许使用 credentials。 允许的值 true, false or null ，默认 null.</li>
+<li>cors[‘Access-Control-Max-Age’]: pre-flight 请求的生命周期。默认 86400.**</li>
+</ol>
+<h3 id="2-2-使用自定义设置"><a href="#2-2-使用自定义设置" class="headerlink" title="2.2 使用自定义设置"></a>2.2 使用自定义设置</h3><p>Cors 过滤器可以使用$cors属性来调整响应头。</p>
+<p>代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">public function behaviors()</span><br><span class="line">&#123;</span><br><span class="line">    return [</span><br><span class="line">        &apos;corsFilter&apos; =&gt; [</span><br><span class="line">            &apos;class&apos; =&gt; \yii\filters\Cors::className(),</span><br><span class="line">            &apos;cors&apos; =&gt; [</span><br><span class="line">                // restrict access to</span><br><span class="line">                &apos;Origin&apos; =&gt; [&apos;http://www.myserver.com&apos;, &apos;https://www.myserver.com&apos;],</span><br><span class="line">                &apos;Access-Control-Request-Method&apos; =&gt; [&apos;POST&apos;, &apos;PUT&apos;],</span><br><span class="line">                // Allow only POST and PUT methods</span><br><span class="line">                &apos;Access-Control-Request-Headers&apos; =&gt; [&apos;X-Wsse&apos;],</span><br><span class="line">                // Allow only headers &apos;X-Wsse&apos;</span><br><span class="line">                &apos;Access-Control-Allow-Credentials&apos; =&gt; true,</span><br><span class="line">                // Allow OPTIONS caching</span><br><span class="line">                &apos;Access-Control-Max-Age&apos; =&gt; 3600,</span><br><span class="line">                // Allow the X-Pagination-Current-Page header to be exposed to the browser.</span><br><span class="line">                &apos;Access-Control-Expose-Headers&apos; =&gt; [&apos;X-Pagination-Current-Page&apos;],</span><br><span class="line">            ],</span><br><span class="line"></span><br><span class="line">        ],</span><br><span class="line">    ];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-3-为特定-action-设置响应头"><a href="#2-3-为特定-action-设置响应头" class="headerlink" title="2.3  为特定 action 设置响应头"></a>2.3  为特定 action 设置响应头</h3><p>可以使用 $actions 属性为特定 action 调整 CORS 响应头，她会覆盖 $cors 上的相同设置。比如为 actionLogin 添加 Control-Allow-Credentials<br>代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">public function behaviors()</span><br><span class="line">&#123;</span><br><span class="line">    return ArrayHelper::merge([</span><br><span class="line">        [</span><br><span class="line">            &apos;class&apos; =&gt; Cors::className(),</span><br><span class="line">            &apos;cors&apos; =&gt; [</span><br><span class="line">                &apos;Origin&apos; =&gt; [&apos;http://www.myserver.net&apos;],</span><br><span class="line">                &apos;Access-Control-Request-Method&apos; =&gt; [&apos;GET&apos;, &apos;HEAD&apos;, &apos;OPTIONS&apos;],</span><br><span class="line">            ],</span><br><span class="line">            &apos;actions&apos; =&gt; [</span><br><span class="line">                &apos;login&apos; =&gt; [</span><br><span class="line">                    &apos;Access-Control-Allow-Credentials&apos; =&gt; true,</span><br><span class="line">                ]</span><br><span class="line">            ]</span><br><span class="line">        ],</span><br><span class="line">    ], parent::behaviors());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="3-参考"><a href="#3-参考" class="headerlink" title="3 参考"></a>3 参考</h2><p>[Cors][1]<br> [1]: <a href="http://www.yiiframework.com/doc-2.0/guide-structure-filters.html#cors" target="_blank" rel="noopener">http://www.yiiframework.com/doc-2.0/guide-structure-filters.html#cors</a></p>
+<p><a href="http://www.yiiframework.com/doc-2.0/guide-rest-controllers.html" target="_blank" rel="noopener">guide-rest-controllers</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/" data-id="cjfdvevu20006n8np7td0hyb1" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Yii2-Restful-实现登陆验证" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-实现登陆验证/" class="article-date">
+  <time datetime="2018-03-30T11:19:18.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/30/Yii2-Restful-实现登陆验证/">Yii2 Restful 实现登陆验证</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-准备工作-完成基本-curd-代码"><a href="#1-准备工作-完成基本-curd-代码" class="headerlink" title="1 准备工作,完成基本 curd 代码"></a>1 准备工作,完成基本 curd 代码</h2><h3 id="1-1-给-user-表添加-access-token-字段"><a href="#1-1-给-user-表添加-access-token-字段" class="headerlink" title="1.1 给 user 表添加 access_token 字段"></a>1.1 给 user 表添加 access_token 字段</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [baojia]&gt; alter table user add column access_token varchar(255);</span><br></pre></td></tr></table></figure>
+<h3 id="1-2-添加测试用户"><a href="#1-2-添加测试用户" class="headerlink" title="1.2 添加测试用户"></a>1.2 添加测试用户</h3><p>打开 signup 页面,注册用户.<br>地址:<a href="http://your-site/index.php?r=site%2Fsignup" target="_blank" rel="noopener">http://your-site/index.php?r=site%2Fsignup</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-570ad820a13fd67e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 16-25-49 的屏幕截图.png"></p>
+<h3 id="1-3-生成-User-模型"><a href="#1-3-生成-User-模型" class="headerlink" title="1.3  生成 User 模型"></a>1.3  生成 User 模型</h3><p><img src="http://upload-images.jianshu.io/upload_images/3248867-0fc501bdc663bf28.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 16-02-08 的屏幕截图.png"></p>
+<p>打开 api/models/User.php,修改如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace api\models;</span><br><span class="line"></span><br><span class="line">use Yii;</span><br><span class="line">use yii\web\UnauthorizedHttpException;</span><br><span class="line">use common\models\User as BaseUser;</span><br><span class="line"></span><br><span class="line">class User extends BaseUser</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-4-生成-UserController"><a href="#1-4-生成-UserController" class="headerlink" title="1.4  生成  UserController"></a>1.4  生成  UserController</h3><p><img src="http://upload-images.jianshu.io/upload_images/3248867-e65fa3229b972b2a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 16-03-22 的屏幕截图.png"></p>
+<p>打开 api/modules/v1/controllers/UserController,修改如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">namespace api\modules\v1\controllers;</span><br><span class="line"></span><br><span class="line">class UserController extends \yii\web\Controller</span><br><span class="line">&#123;</span><br><span class="line">    public $modelClass = &apos;app\models\User&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-5-配置-urlManager"><a href="#1-5-配置-urlManager" class="headerlink" title="1.5 配置 urlManager"></a>1.5 配置 urlManager</h3><p>在 rule 项目下新增<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&apos;rules&apos; =&gt; [</span><br><span class="line">           ...</span><br><span class="line">              [</span><br><span class="line">                       &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">                       &apos;controller&apos; =&gt; &apos;v1/user&apos;,</span><br><span class="line"></span><br><span class="line">              ]</span><br><span class="line">           ...</span><br><span class="line">        ],</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-6-访问用户列表"><a href="#1-6-访问用户列表" class="headerlink" title="1.6  访问用户列表"></a>1.6  访问用户列表</h3><p>URL : GET <a href="http://api.baojia.local/v1/users" target="_blank" rel="noopener">http://api.baojia.local/v1/users</a><br><img src="http://upload-images.jianshu.io/upload_images/3248867-5d7c8aad8dd62b5f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 11-34-26 的屏幕截图.png"><br>其他的自己尝试吧</p>
+<p>基本的 curd 成功啦 !</p>
+<h2 id="2-实现登陆"><a href="#2-实现登陆" class="headerlink" title="2 实现登陆"></a>2 实现登陆</h2><h3 id="2-1-新建帮助类-Util-php"><a href="#2-1-新建帮助类-Util-php" class="headerlink" title="2.1 新建帮助类 Util.php"></a>2.1 新建帮助类 Util.php</h3><p>路径: common/helper/Util.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace common\helper;</span><br><span class="line"></span><br><span class="line">class  Util&#123;</span><br><span class="line">    public static function format($status,$data,$message)&#123;</span><br><span class="line"></span><br><span class="line">          if(empty($data))&#123;</span><br><span class="line">              $data = null;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          $result = [</span><br><span class="line">            &apos;status&apos; =&gt; $status,</span><br><span class="line">            &apos;data&apos;=&gt; $data,</span><br><span class="line">            &apos;message&apos;=&gt; $message</span><br><span class="line">         ];</span><br><span class="line"></span><br><span class="line">          return $result;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public static  function error($message)&#123;</span><br><span class="line"></span><br><span class="line">          if( is_array($message) )&#123;</span><br><span class="line">                    $message = current($message);</span><br><span class="line"></span><br><span class="line">                    if(is_array($message))&#123;</span><br><span class="line">                              $message = current($message);</span><br><span class="line">                    &#125;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        return static::format( &apos;error&apos;, null, $message);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public static function  success($data)&#123;</span><br><span class="line"></span><br><span class="line">        return static::format( &apos;success&apos;, $data, &apos;&apos; );</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-新建-LoginForm-php"><a href="#2-2-新建-LoginForm-php" class="headerlink" title="2.2 新建 LoginForm.php"></a>2.2 新建 LoginForm.php</h3><p>路径: api/models/LoginForm.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace api\models;</span><br><span class="line"></span><br><span class="line">use Yii;</span><br><span class="line">use yii\base\Model;</span><br><span class="line"></span><br><span class="line">use api\models\User;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * Login form</span><br><span class="line"> */</span><br><span class="line">class LoginForm extends Model</span><br><span class="line">&#123;</span><br><span class="line">    public $username;</span><br><span class="line">    public $password;</span><br><span class="line">    public $rememberMe = true;</span><br><span class="line"></span><br><span class="line">    //当前登陆 user 对象</span><br><span class="line">    private $_user;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * @inheritdoc</span><br><span class="line">     */</span><br><span class="line">    public function attributeLabels()</span><br><span class="line">    &#123;</span><br><span class="line">        return [</span><br><span class="line">            &apos;username&apos; =&gt; &apos;用户名&apos;,</span><br><span class="line">            &apos;password&apos; =&gt; &apos;密码&apos;,</span><br><span class="line">        ];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * @inheritdoc</span><br><span class="line">     */</span><br><span class="line">    public function rules()</span><br><span class="line">    &#123;</span><br><span class="line">        return [</span><br><span class="line">            // username and password are both required</span><br><span class="line">            [[&apos;username&apos;, &apos;password&apos;], &apos;required&apos;],</span><br><span class="line">            // rememberMe must be a boolean value</span><br><span class="line">            [&apos;rememberMe&apos;, &apos;boolean&apos;],</span><br><span class="line">            // password is validated by validatePassword()</span><br><span class="line">            [&apos;password&apos;, &apos;validatePassword&apos;],</span><br><span class="line">        ];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">   /**</span><br><span class="line">     * 自定义的密码认证方法</span><br><span class="line">     */</span><br><span class="line">    public function validatePassword($attribute, $params)</span><br><span class="line">    &#123;</span><br><span class="line">         if (!$this-&gt;hasErrors()) &#123;</span><br><span class="line"></span><br><span class="line">                    $user = $this-&gt;getUser();</span><br><span class="line"></span><br><span class="line">                    if (! $user  || ! $user-&gt;validatePassword($this-&gt;password)) &#123;</span><br><span class="line"></span><br><span class="line">                             $this-&gt;addError($attribute, &apos;用户名或密码错误.&apos;);</span><br><span class="line"></span><br><span class="line">                    &#125;</span><br><span class="line">         &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Logs in a user using the provided username and password.</span><br><span class="line">     *</span><br><span class="line">     * @return bool whether the user is logged in successfully</span><br><span class="line">     */</span><br><span class="line">    public function login()</span><br><span class="line">    &#123;</span><br><span class="line">        if ( $this-&gt;validate() ) &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            $this-&gt;onGenerateAccessToken();</span><br><span class="line"></span><br><span class="line">            return Yii::$app-&gt;user-&gt;login($this-&gt;getUser(), $this-&gt;rememberMe ? 3600*24*30 : 0);</span><br><span class="line"></span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         return false;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 根据用户名获取用户的认证信息</span><br><span class="line">     *</span><br><span class="line">     * @return User|null</span><br><span class="line">     */</span><br><span class="line">    protected function getUser()</span><br><span class="line">    &#123;</span><br><span class="line">         if ($this-&gt;_user === null) &#123;</span><br><span class="line">                    $this-&gt;_user = User::findByUsername($this-&gt;username);</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         return $this-&gt;_user;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 登录校验成功后，为用户生成新的token</span><br><span class="line">     * 如果token失效，则重新生成token</span><br><span class="line">     */</span><br><span class="line">    public   function onGenerateAccessToken()</span><br><span class="line">    &#123;</span><br><span class="line"></span><br><span class="line">        if ( !User::checkAccessToken( $this-&gt;_user-&gt;access_token) ) &#123;</span><br><span class="line">                $this-&gt;_user-&gt;generateAccessToken();</span><br><span class="line">                $this-&gt;_user-&gt;save(false);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-修改urlManager-增加对-actionLogin-actionSignup-的支持"><a href="#2-2-修改urlManager-增加对-actionLogin-actionSignup-的支持" class="headerlink" title="2.2 修改urlManager,增加对 actionLogin,actionSignup 的支持"></a>2.2 修改urlManager,增加对 actionLogin,actionSignup 的支持</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&apos;rules&apos; =&gt; [</span><br><span class="line">           ...</span><br><span class="line">              [</span><br><span class="line">                       &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">                       &apos;controller&apos; =&gt; &apos;v1/user&apos;,</span><br><span class="line">                        &apos;extraPatterns&apos; =&gt; [</span><br><span class="line">                                  &apos;POST login&apos; =&gt; &apos;login&apos;,</span><br><span class="line">                                  &apos;POST signup&apos; =&gt; &apos;signup&apos;,</span><br><span class="line">                       ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">              ]</span><br><span class="line">           ...</span><br><span class="line">        ],</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-接下来-登陆吧"><a href="#2-3-接下来-登陆吧" class="headerlink" title="2.3 接下来 登陆吧"></a>2.3 接下来 登陆吧</h3><p>URL : POST  <a href="http://api.baojia.local/v1/users/login" target="_blank" rel="noopener">http://api.baojia.local/v1/users/login</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-62996304d31c6e61.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 16-39-07 的屏幕截图.png"></p>
+<h2 id="3-实现注册新用户"><a href="#3-实现注册新用户" class="headerlink" title="3 实现注册新用户"></a>3 实现注册新用户</h2><h3 id="3-1-修改-user表"><a href="#3-1-修改-user表" class="headerlink" title="3.1 修改 user表"></a>3.1 修改 user表</h3><p>因为我们想让 用户可以不填写 邮箱,如果填写邮箱,则需要检查邮箱唯一性.由于email 字段具有 unique 属性,无法设置成空字符串,因此设置默认值为 null<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [baojia]&gt; alter table user modify email varchar(255);</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-2-新建-SignupForm"><a href="#3-2-新建-SignupForm" class="headerlink" title="3.2 新建 SignupForm"></a>3.2 新建 SignupForm</h3><p>路径 : api/models/SignupForm.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">namespace api\models;</span><br><span class="line"></span><br><span class="line">use yii\base\Model;</span><br><span class="line">use api\models\User;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * SignUpForm</span><br><span class="line"> */</span><br><span class="line">class SignupForm extends Model</span><br><span class="line">&#123;</span><br><span class="line">          public $username;</span><br><span class="line">          public $email;</span><br><span class="line">          public $password;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        /**</span><br><span class="line">        * @inheritdoc</span><br><span class="line">        * 对数据的校验规则</span><br><span class="line">        */</span><br><span class="line">       public function rules()</span><br><span class="line">       &#123;</span><br><span class="line">           return [</span><br><span class="line">               // 对username的值进行两边去空格过滤</span><br><span class="line">               [&apos;username&apos;, &apos;trim&apos;],</span><br><span class="line">               [&apos;username&apos;, &apos;required&apos;, &apos;message&apos; =&gt; &apos;用户名不可以为空&apos;],</span><br><span class="line">               [&apos;username&apos;, &apos;unique&apos;, &apos;targetClass&apos; =&gt; &apos;\api\models\User&apos;, &apos;message&apos; =&gt; &apos;用户名已存在.&apos;],</span><br><span class="line">               [&apos;username&apos;, &apos;string&apos;, &apos;min&apos; =&gt; 2, &apos;max&apos; =&gt; 255],</span><br><span class="line"></span><br><span class="line">              [&apos;email&apos;, &apos;trim&apos;],</span><br><span class="line">              [&apos;email&apos;, &apos;default&apos;, &apos;value&apos; =&gt; null],</span><br><span class="line">              [&apos;email&apos;, &apos;email&apos;],</span><br><span class="line">              [&apos;email&apos;, &apos;string&apos;, &apos;max&apos; =&gt; 255],</span><br><span class="line">              [&apos;email&apos;, &apos;unique&apos;, &apos;targetClass&apos; =&gt; &apos;\api\models\User&apos;, &apos;message&apos; =&gt; &apos;邮箱已经被使用了.&apos;,&apos;when&apos;=&gt; function($model, $attribute)&#123;</span><br><span class="line">                        return  !!$attribute; // 邮箱不为空时候检查唯一性</span><br><span class="line">              &#125;],</span><br><span class="line"></span><br><span class="line">               [&apos;password&apos;, &apos;required&apos;, &apos;message&apos; =&gt; &apos;密码不可以为空&apos;],</span><br><span class="line">               [&apos;password&apos;, &apos;string&apos;, &apos;min&apos; =&gt; 6, &apos;tooShort&apos; =&gt; &apos;密码至少填写6位&apos;],</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">           ];</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       /**</span><br><span class="line">        * Signs user up.</span><br><span class="line">        *</span><br><span class="line">        * @return User|null the saved model or null if saving fails</span><br><span class="line">        */</span><br><span class="line">       public function signup()&#123;</span><br><span class="line"></span><br><span class="line">           // 调用validate方法对表单数据进行验证，验证规则参考上面的rules方法</span><br><span class="line">            if (  !$this-&gt;validate() )&#123;</span><br><span class="line">                    return null;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            // 实现数据入库操作</span><br><span class="line">            $user = new User;</span><br><span class="line"></span><br><span class="line">            $user-&gt;username = $this-&gt;username;</span><br><span class="line">            $user-&gt;email = $this-&gt;email;</span><br><span class="line"></span><br><span class="line">            // 设置密码</span><br><span class="line">            $user-&gt;setPassword($this-&gt;password);</span><br><span class="line"></span><br><span class="line">             // 生成 &quot;remember me&quot; 认证key</span><br><span class="line">            $user-&gt;generateAuthkey();</span><br><span class="line"></span><br><span class="line">            // save(false)的意思是：不调用 User 的 rules 再做校验并实现数据入库操作</span><br><span class="line">             // 这里这个 false 如果不加，save底层会调用  User 的rules方法再对数据进行一次校验，</span><br><span class="line">             // 因为我们上面已经调用Signup的rules校验过了，这里就没必要在用 User 的 rules 校验了</span><br><span class="line">            return   $user-&gt;save(false) ? $user : null;</span><br><span class="line"></span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-3-修改-UserController-增加-actionSignup方法"><a href="#3-3-修改-UserController-增加-actionSignup方法" class="headerlink" title="3.3 修改 UserController,增加 actionSignup方法"></a>3.3 修改 UserController,增加 actionSignup方法</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"> /*</span><br><span class="line"> * 注册新用户</span><br><span class="line"> */</span><br><span class="line">public function actionSignup()&#123;</span><br><span class="line"></span><br><span class="line">      $model = new SignupForm();</span><br><span class="line"></span><br><span class="line">      $model-&gt;setAttributes(Yii::$app-&gt;request-&gt;post());</span><br><span class="line"></span><br><span class="line">      if( $model-&gt;signup() )&#123;</span><br><span class="line"></span><br><span class="line">            return Util::success( [</span><br><span class="line">                    &apos;username&apos;=&gt;$model-&gt;username,</span><br><span class="line">                    &apos;email&apos;=&gt;$model-&gt;email</span><br><span class="line">                ] );</span><br><span class="line"></span><br><span class="line">      &#125;else&#123;</span><br><span class="line"></span><br><span class="line">           return Util::error( $model-&gt;getErrors() );</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-3-修改urlManager-增加对-actionSignup-的支持"><a href="#3-3-修改urlManager-增加对-actionSignup-的支持" class="headerlink" title="3.3 修改urlManager,增加对 actionSignup 的支持"></a>3.3 修改urlManager,增加对 actionSignup 的支持</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&apos;rules&apos; =&gt; [</span><br><span class="line">           ...</span><br><span class="line">              [</span><br><span class="line">                       &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">                       &apos;controller&apos; =&gt; &apos;v1/user&apos;,</span><br><span class="line">                        &apos;extraPatterns&apos; =&gt; [</span><br><span class="line">                                  &apos;POST login&apos; =&gt; &apos;login&apos;,</span><br><span class="line">                                  &apos;POST signup&apos; =&gt; &apos;signup&apos;,</span><br><span class="line">                       ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">              ]</span><br><span class="line">           ...</span><br><span class="line">        ],</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-愉快的注册吧"><a href="#3-4-愉快的注册吧" class="headerlink" title="3.4 愉快的注册吧"></a>3.4 愉快的注册吧</h3><p>URL : POST <a href="http://api.baojia.local/v1/users/signup" target="_blank" rel="noopener">http://api.baojia.local/v1/users/signup</a></p>
+<p> <img src="http://upload-images.jianshu.io/upload_images/3248867-eae6d7365e50943a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 17-56-51 的屏幕截图.png"></p>
+<p> <img src="http://upload-images.jianshu.io/upload_images/3248867-3dac934f81edab71.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 17-59-51 的屏幕截图.png"></p>
+<h2 id="4-实现登陆验证"><a href="#4-实现登陆验证" class="headerlink" title="4 实现登陆验证"></a>4 实现登陆验证</h2><h3 id="4-1-开放-login-signup-可以访问-其他方法禁止非法访问"><a href="#4-1-开放-login-signup-可以访问-其他方法禁止非法访问" class="headerlink" title="4.1 开放 login/signup 可以访问,其他方法禁止非法访问"></a>4.1 开放 login/signup 可以访问,其他方法禁止非法访问</h3><p>现在谁都可以访问我的用户信息,宝宝好害怕怕~,肿么办? 添加用户认证行为就可以啦.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public function behaviors()</span><br><span class="line">&#123;</span><br><span class="line">    return ArrayHelper::merge (parent::behaviors(), [</span><br><span class="line">         &apos;authenticator&apos; =&gt; [</span><br><span class="line">                    &apos;class&apos; =&gt; QueryParamAuth::className() ,</span><br><span class="line"></span><br><span class="line">         ]</span><br><span class="line">    ] );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>说没有授权<br><img src="http://upload-images.jianshu.io/upload_images/3248867-2247996990aa1037.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-27-50 的屏幕截图.png"></p>
+<p>But ,不能登陆了!!!</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-7c23956c37c76ffb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-18-48 的屏幕截图.png"></p>
+<p>不用急,在 UserController 添加一行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public function behaviors()</span><br><span class="line"> &#123;</span><br><span class="line">    return ArrayHelper::merge (parent::behaviors(), [</span><br><span class="line">         &apos;authenticator&apos; =&gt; [</span><br><span class="line">                &apos;class&apos; =&gt; HttpBasicAuth::className(),</span><br><span class="line">                &apos;optional&apos; =&gt; [</span><br><span class="line">                      &apos;login&apos;,</span><br><span class="line">                      &apos;signup&apos;,</span><br><span class="line"></span><br><span class="line">                ],</span><br><span class="line">         ]</span><br><span class="line">    ] );</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>现在 login,signup 都可以访问,其他方法无法访,宝宝再也不怕了.<br><img src="http://upload-images.jianshu.io/upload_images/3248867-600b200f51102a42.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-23-36 的屏幕截图.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-2247996990aa1037.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-27-50 的屏幕截图.png"></p>
+<h3 id="4-2-访问用户信息"><a href="#4-2-访问用户信息" class="headerlink" title="4.2 访问用户信息"></a>4.2 访问用户信息</h3><p>用户登陆,获取 access_token,存储到客户端<br><img src="http://upload-images.jianshu.io/upload_images/3248867-bc69ef22f95011f9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-37-38 的屏幕截图.png"></p>
+<p>使用 access_token:nLFZL8JLoTdRg1YZ0e4rWWCN-L0N9xOy_1503397324 访问用户信息</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-6041fb85b5c6092d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-38-07 的屏幕截图.png"></p>
+<p>修改 token,在 token 前加一个感叹号,access_token:!nLFZL8JLoTdRg1YZ0e4rWWCN-L0N9xOy_1503397324 ,无法访问用户信息啦<br><img src="http://upload-images.jianshu.io/upload_images/3248867-11b235dc86746225.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 18-38-21 的屏幕截图.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-实现登陆验证/" data-id="cjfdvevt70000n8np75kq1fpw" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Yii2-Restful-自定义方法" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-自定义方法/" class="article-date">
+  <time datetime="2018-03-30T11:18:36.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/30/Yii2-Restful-自定义方法/">Yii2 Restful 自定义方法</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>yii2 的 restful 接口的默认 帮我们实现了 curd,可是我要怎么添加自定义方法呢,下面以添加一个 搜索方法为例介绍.</p>
+</blockquote>
+<h2 id="1-打开-NewsController-添加-actionSearch-方法"><a href="#1-打开-NewsController-添加-actionSearch-方法" class="headerlink" title="1 打开 NewsController,添加 actionSearch 方法"></a>1 打开 NewsController,添加 actionSearch 方法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">namespace api\modules\v1\controllers;</span><br><span class="line"></span><br><span class="line">use api\models\News;</span><br><span class="line"></span><br><span class="line">class NewsController extends \yii\rest\ActiveController</span><br><span class="line">&#123;</span><br><span class="line">      public $modelClass = &apos;api\models\News&apos;;</span><br><span class="line"></span><br><span class="line">      public function actionSearch($keyword)&#123;</span><br><span class="line"></span><br><span class="line">            if(!$keyword)&#123;</span><br><span class="line">                return null;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $models = News::find()-&gt;where([&apos;like&apos;, &apos;title&apos;, $keyword])-&gt;all();</span><br><span class="line"></span><br><span class="line">            return $models;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-访问搜索方法"><a href="#2-访问搜索方法" class="headerlink" title="2 访问搜索方法"></a>2 访问搜索方法</h2><p>URL : <a href="http://api.baojia.local/v1/news/search/111" target="_blank" rel="noopener">http://api.baojia.local/v1/news/search/111</a></p>
+<p>纳尼? 找不到方法?</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-c9e2a97afdb4ef4e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 19-10-43 的屏幕截图.png"></p>
+<h2 id="3-修改-urlMangager-增加一条-rule"><a href="#3-修改-urlMangager-增加一条-rule" class="headerlink" title="3  修改 urlMangager,增加一条 rule"></a>3  修改 urlMangager,增加一条 rule</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">return [</span><br><span class="line"></span><br><span class="line"> ......</span><br><span class="line"></span><br><span class="line"> &apos;rules&apos; =&gt; [</span><br><span class="line">    [</span><br><span class="line">        &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">        &apos;controller&apos; =&gt;  &apos;v1/news&apos;,</span><br><span class="line">        &apos;extraPatterns&apos; =&gt; [</span><br><span class="line">            &apos;GET  search/&lt;keyword&gt;&apos; =&gt; &apos;search&apos;,</span><br><span class="line"></span><br><span class="line">        ]</span><br><span class="line">   ],</span><br><span class="line"></span><br><span class="line">     ],</span><br><span class="line"></span><br><span class="line"> ......</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-0292849cea370a0c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 19-05-04 的屏幕截图.png"></p>
+<p>收工!!!</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-自定义方法/" data-id="cjfdvevu20004n8npavqpujrc" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Yii2-Restful-文件上传" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-文件上传/" class="article-date">
+  <time datetime="2018-03-30T11:17:54.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/30/Yii2-Restful-文件上传/">Yii2 Restful  文件上传</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-新建-UploadForm"><a href="#1-新建-UploadForm" class="headerlink" title="1 新建 UploadForm"></a>1 新建 UploadForm</h2><hr>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">namespace api\models;</span><br><span class="line"></span><br><span class="line">use yii\base\Model;</span><br><span class="line">use yii\web\UploadedFile;</span><br><span class="line"></span><br><span class="line">use common\helper\Util;</span><br><span class="line"></span><br><span class="line">class UploadForm extends Model</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    public $file ;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    public function upload()</span><br><span class="line">    &#123;</span><br><span class="line"></span><br><span class="line">          $fileInstance =    UploadedFile::getInstanceByName(&apos;file&apos;);</span><br><span class="line"></span><br><span class="line">          if(!$fileInstance)&#123;</span><br><span class="line"></span><br><span class="line">                    $this-&gt;addError(&apos;file&apos;, &apos;请选择文件&apos;);</span><br><span class="line"></span><br><span class="line">                    return false;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">         if ( $this-&gt;validate() ) &#123;</span><br><span class="line"></span><br><span class="line">                    $new_name = Util::upload($fileInstance);</span><br><span class="line"></span><br><span class="line">                   return $new_name;</span><br><span class="line"></span><br><span class="line">         &#125; else &#123;</span><br><span class="line">                   return false;</span><br><span class="line">         &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-修改帮助文件-common-helper-Util-php，添加以下代码"><a href="#2-修改帮助文件-common-helper-Util-php，添加以下代码" class="headerlink" title="2  修改帮助文件  common/helper/Util.php，添加以下代码"></a>2  修改帮助文件  common/helper/Util.php，添加以下代码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public static function upload($instance)&#123;</span><br><span class="line"></span><br><span class="line">         $rootPath  =  \Yii::$app-&gt;basePath . &apos;/../&apos;; //根目录</span><br><span class="line"></span><br><span class="line">          $newName = &apos;upload/&apos;.</span><br><span class="line">                                $instance-&gt;baseName  . &apos;-&apos; .</span><br><span class="line">                                time(). &apos;.&apos; .</span><br><span class="line">                                $instance-&gt;extension;</span><br><span class="line"></span><br><span class="line">          $instance-&gt;saveAs($rootPath.$newName);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">          return  $newName ;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-修改-UserController-添加-actionLogin-方法"><a href="#3-修改-UserController-添加-actionLogin-方法" class="headerlink" title="3 修改 UserController,添加 actionLogin 方法"></a>3 修改 UserController,添加 actionLogin 方法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">public function actionUpload()</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    $model = new UploadForm();</span><br><span class="line"></span><br><span class="line">    $result = $model-&gt;upload() ;</span><br><span class="line"></span><br><span class="line">    if ( $result ) &#123;</span><br><span class="line">       // 文件上传成功</span><br><span class="line">       return Util::success(  $result );</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        return Util::error( $model-&gt;getErrors() );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-修改-urlManager-添加以下代码"><a href="#4-修改-urlManager-添加以下代码" class="headerlink" title="4 修改 urlManager,添加以下代码"></a>4 修改 urlManager,添加以下代码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> &apos;rules&apos; =&gt; [</span><br><span class="line">      [</span><br><span class="line">          &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">          &apos;controller&apos; =&gt; &apos;user&apos;,</span><br><span class="line">          &apos;extraPatterns&apos; =&gt; [</span><br><span class="line">                ......</span><br><span class="line"></span><br><span class="line">                &apos;POST    upload&apos; =&gt; &apos;upload&apos;,</span><br><span class="line"></span><br><span class="line">                .......</span><br><span class="line">            ]</span><br><span class="line">      ],</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-4eb2b9d98c0d0057.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-22 23-44-59 的屏幕截图.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-文件上传/" data-id="cjfdvevu20003n8npfykt1zsp" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Yii2-Restful-支持分页" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-支持分页/" class="article-date">
+  <time datetime="2018-03-30T11:17:08.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/30/Yii2-Restful-支持分页/">Yii2 Restful  支持分页</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>大部分情况下，我们的数据是需要分页的。可是 Yii2 restful<br>默认情况下并不显示分页信息,我们不知道当前是哪一页，如何访问下一页，那么如何才能显示出分页数据呢？不要急，下面通过例子来说明。</p>
+</blockquote>
+<h2 id="1-新建-stock-接口，-参考Yii2-Restful快速构建CURD-1"><a href="#1-新建-stock-接口，-参考Yii2-Restful快速构建CURD-1" class="headerlink" title="1 新建 stock 接口，[参考Yii2 Restful快速构建CURD][1]"></a>1 新建 stock 接口，[参考Yii2 Restful快速构建CURD][1]</h2><h2 id="2-访问信息列表，发现没有分页数据"><a href="#2-访问信息列表，发现没有分页数据" class="headerlink" title="2 访问信息列表，发现没有分页数据"></a>2 访问信息列表，发现没有分页数据</h2><p>操作 : stock/index<br>URL : GET <a href="http://api.baojia.local/v1/stocks" target="_blank" rel="noopener">http://api.baojia.local/v1/stocks</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-c93873cacd0b1c4b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 10-26-29 的屏幕截图.png"></p>
+<h2 id="3-修改-StockController-新增-serializer-属性"><a href="#3-修改-StockController-新增-serializer-属性" class="headerlink" title="3 修改 StockController,新增 $serializer 属性"></a>3 修改 StockController,新增 $serializer 属性</h2><p>文件路径 ： api\modules\v1\controllers\StockController.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">namespace api\modules\v1\controllers;</span><br><span class="line"></span><br><span class="line">use yii\rest\ActiveController;</span><br><span class="line"></span><br><span class="line">class  StockController  extends ActiveController</span><br><span class="line">&#123;</span><br><span class="line">    public $modelClass = &apos;api\models\Stock&apos;;</span><br><span class="line"></span><br><span class="line">    public $serializer = [</span><br><span class="line">        &apos;class&apos; =&gt; &apos;yii\rest\Serializer&apos;,</span><br><span class="line">        &apos;collectionEnvelope&apos; =&gt; &apos;items&apos;,</span><br><span class="line">    ];</span><br></pre></td></tr></table></figure></p>
+<h2 id="4-再次访问信息列表，发现数据在-items-项目下，在-links-和-metadata-中有分页信息"><a href="#4-再次访问信息列表，发现数据在-items-项目下，在-links-和-metadata-中有分页信息" class="headerlink" title="4 再次访问信息列表，发现数据在 items 项目下，在 _links 和 _metadata 中有分页信息"></a>4 再次访问信息列表，发现数据在 items 项目下，在 _links 和 _metadata 中有分页信息</h2><p><img src="http://upload-images.jianshu.io/upload_images/3248867-98ff1cf14db7f287.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 10-24-20 的屏幕截图.png"></p>
+<h2 id="3-使用-links-中的-next-项，访问下一页。"><a href="#3-使用-links-中的-next-项，访问下一页。" class="headerlink" title="3 使用 _links 中的 next 项，访问下一页。"></a>3 使用 _links 中的 next 项，访问下一页。</h2><p>self 代表当前页<br>next 代表下一页<br>last 代表最后一页面</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-a1e559f869a7ee68.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 10-25-30 的屏幕截图.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-支持分页/" data-id="cjfdvevtn0002n8npmowidcwe" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Yii2-Restful-快速构建-CURD" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/Yii2-Restful-快速构建-CURD/" class="article-date">
+  <time datetime="2018-03-30T11:12:35.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/30/Yii2-Restful-快速构建-CURD/">Yii2 Restful  快速构建 CURD</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-什么是Restful"><a href="#1-什么是Restful" class="headerlink" title="1 什么是Restful"></a>1 什么是Restful</h2><p>Restful 是一种软件架构风格，提供了一组设计原则和约束条件。它主要用于客户端和服务器交互类的软件。基于这个风格设计的软件可以更简洁，更有层次，更易于实现缓存等机制。</p>
+<p><strong>Restful  的特征：</strong></p>
+<ol>
+<li>每一个URI代表一种资源</li>
+<li>客户端和服务器之间，传递这种资源的某种表现层</li>
+<li>客户端通过HTTP动词，对服务器端资源进行操作，实现”表现层状态转化”</li>
+</ol>
+<h2 id="2-建立单独的应用程序"><a href="#2-建立单独的应用程序" class="headerlink" title="2 建立单独的应用程序"></a>2 建立单独的应用程序</h2><p>为了提高程序的可维护性，我们需要添加单独的 api 应用程序，并启用来做版本管理。详细参考  <a href="http://www.jianshu.com/p/516c99b180c4" target="_blank" rel="noopener">Yii2 Restful 添加Api应用</a></p>
+<h2 id="3-开启路由美化功能"><a href="#3-开启路由美化功能" class="headerlink" title="3 开启路由美化功能"></a>3 开启路由美化功能</h2><p>文件路径 ： api/config/main.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&apos;components&apos; =&gt; [</span><br><span class="line">    ......</span><br><span class="line"></span><br><span class="line">    &apos;urlManager&apos; =&gt; [</span><br><span class="line">        &apos;enablePrettyUrl&apos; =&gt; true,// 启用美化URL</span><br><span class="line">         &apos;enableStrictParsing&apos; =&gt; true, // 是否执行严格的url解析</span><br><span class="line">         &apos;showScriptName&apos; =&gt; false,// 在URL路径中是否显示脚本入口文件</span><br><span class="line">         &apos;rules&apos; =&gt; [],</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">......</span><br><span class="line">],</span><br></pre></td></tr></table></figure>
+<h2 id="4-启用-JSON-输入"><a href="#4-启用-JSON-输入" class="headerlink" title="4 启用 JSON 输入"></a>4 启用 JSON 输入</h2><p>文件路径 ： api/config/main.php</p>
+<p>默认的 Restful API 将仅可以分辨 application/x-www-form-urlencoded 和 multipart/form-data 输入格式。<br>为了使 API 可以接收 JSON 格式的数据请求，配置 request 应用程序组件的 parsers 属性使用 yii\web\JsonParser 用于JSON输入：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&apos;request&apos; =&gt; [</span><br><span class="line">    &apos;parsers&apos; =&gt; [</span><br><span class="line">        &apos;application/json&apos; =&gt; &apos;yii\web\JsonParser&apos;,</span><br><span class="line">    ]</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<h2 id="5-使用-gii-生成独立模块-支持-api-版本控制"><a href="#5-使用-gii-生成独立模块-支持-api-版本控制" class="headerlink" title="5 使用 gii 生成独立模块,支持 api 版本控制"></a>5 使用 gii 生成独立模块,支持 api 版本控制</h2><h3 id="5-1-生成代码"><a href="#5-1-生成代码" class="headerlink" title="5.1 生成代码"></a>5.1 生成代码</h3><p><img src="http://upload-images.jianshu.io/upload_images/3248867-6e149b0563e41761.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="module-gen.png"></p>
+<h3 id="5-2-修改配置文件-支持-v1-模块"><a href="#5-2-修改配置文件-支持-v1-模块" class="headerlink" title="5.2 修改配置文件,支持 v1 模块"></a>5.2 修改配置文件,支持 v1 模块</h3><p>文件路径 ： api/config/main.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">......</span><br><span class="line">&apos;modules&apos; =&gt; [</span><br><span class="line">    &apos;v1&apos; =&gt; [</span><br><span class="line">        &apos;class&apos; =&gt; &apos;api\modules\v1\Module&apos;,</span><br><span class="line">    ],</span><br><span class="line">],</span><br><span class="line">......</span><br></pre></td></tr></table></figure></p>
+<h2 id="6-使用-gii-生成基础代码，并修改"><a href="#6-使用-gii-生成基础代码，并修改" class="headerlink" title="6 使用 gii 生成基础代码，并修改"></a>6 使用 gii 生成基础代码，并修改</h2><h3 id="6-1-生成-model"><a href="#6-1-生成-model" class="headerlink" title="6.1 生成 model"></a>6.1 生成 model</h3><p><img src="http://upload-images.jianshu.io/upload_images/3248867-caf49c9f8c6bec5c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 10-55-27 的屏幕截图.png"></p>
+<h3 id="6-2-生成-controller"><a href="#6-2-生成-controller" class="headerlink" title="6.2 生成 controller"></a>6.2 生成 controller</h3><p><img src="http://upload-images.jianshu.io/upload_images/3248867-74805eb5072c9ec1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 10-56-44 的屏幕截图.png"></p>
+<h3 id="6-3-修改模型"><a href="#6-3-修改模型" class="headerlink" title="6.3  修改模型"></a>6.3  修改模型</h3><p>文件路径 ： api\models\Stock.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">namespace api\models;</span><br><span class="line"></span><br><span class="line">use yii\db\ActiveRecord;</span><br><span class="line"></span><br><span class="line">class Stock extends ActiveRecord</span><br><span class="line">&#123;</span><br><span class="line">     public function rules()</span><br><span class="line">    &#123;</span><br><span class="line">        return [</span><br><span class="line">            [[&apos;symbol&apos;, &apos;code&apos;,&apos;name&apos;,&apos;ipo_date&apos;], &apos;safe&apos;],</span><br><span class="line">        ];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="6-4-修改控制器"><a href="#6-4-修改控制器" class="headerlink" title="6.4 修改控制器"></a>6.4 修改控制器</h3><p>文件路径 ： api\modules\v1\controllers\StockController.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">namespace api\modules\v1\controllers;</span><br><span class="line"></span><br><span class="line">class NewsController extends \yii\rest\ActiveController</span><br><span class="line">&#123;</span><br><span class="line">    public $modelClass = &apos;api\models\Stock&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="7-配置路由信息"><a href="#7-配置路由信息" class="headerlink" title="7 配置路由信息"></a>7 配置路由信息</h2><p>文件路径 ： api/config/main.php<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">return [</span><br><span class="line">    &apos;enablePrettyUrl&apos; =&gt; true,// 启用美化URL</span><br><span class="line">    &apos;enableStrictParsing&apos; =&gt; true, // 是否执行严格的url解析</span><br><span class="line">    &apos;showScriptName&apos; =&gt; false,// 在URL路径中是否显示脚本入口文件</span><br><span class="line">    &apos;rules&apos; =&gt; [</span><br><span class="line">        [</span><br><span class="line">            &apos;class&apos; =&gt; &apos;yii\rest\UrlRule&apos;,</span><br><span class="line">            &apos;controller&apos; =&gt; &apos;v1/stock&apos;</span><br><span class="line">        ]</span><br><span class="line"></span><br><span class="line">     ],</span><br><span class="line">];</span><br></pre></td></tr></table></figure></p>
+<h2 id="8-模拟请求"><a href="#8-模拟请求" class="headerlink" title="8 模拟请求"></a>8 模拟请求</h2><p>YII2常用的 Restful 请求有：</p>
+<ol>
+<li>GET查看信息</li>
+<li>POST创建信息</li>
+<li>PUT更新信息</li>
+<li>DELETE删除信息</li>
+</ol>
+<p>GET 请求 默认对应 index 或 view 方法，用于查看信息</p>
+<h3 id="8-1-查看列表"><a href="#8-1-查看列表" class="headerlink" title="8.1 查看列表"></a>8.1 查看列表</h3><p>操作 :  stock/index<br>URL  :  GET <a href="http://api.baojia.local/v1/stocks" target="_blank" rel="noopener">http://api.baojia.local/v1/stocks</a><br><img src="http://upload-images.jianshu.io/upload_images/3248867-37678e85f9a2cc6f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 11-01-29 的屏幕截图.png"></p>
+<h3 id="8-2-查看详细信息"><a href="#8-2-查看详细信息" class="headerlink" title="8.2 查看详细信息"></a>8.2 查看详细信息</h3><p>操作 :  stock/view<br>URL  :  GET <a href="http://api.baojia.local/v1/news/4" target="_blank" rel="noopener">http://api.baojia.local/v1/news/4</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-8aaa9311c1797ab6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 11-02-39 的屏幕截图.png"></p>
+<h3 id="8-3-新增信息"><a href="#8-3-新增信息" class="headerlink" title="8.3 新增信息"></a>8.3 新增信息</h3><p>操作 :  stock/create<br>URL  :  POST <a href="http://api.baojia.local/v1/stocks" target="_blank" rel="noopener">http://api.baojia.local/v1/stocks</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-068c11935604f7bb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 11-08-26 的屏幕截图.png"></p>
+<h3 id="8-4-更新信息"><a href="#8-4-更新信息" class="headerlink" title="8.4 更新信息"></a>8.4 更新信息</h3><p>操作 :  stock/update<br>URL  :  PUT <a href="http://api.baojia.local/v1/stocks/3417" target="_blank" rel="noopener">http://api.baojia.local/v1/stocks/3417</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-4e6c4092594efa17.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 11-11-01 的屏幕截图.png"></p>
+<h3 id="8-5-删除信息"><a href="#8-5-删除信息" class="headerlink" title="8.5 删除信息"></a>8.5 删除信息</h3><p>操作 :  stock/update<br>URL  :  PUT <a href="http://api.baojia.local/v1/stocks/3417" target="_blank" rel="noopener">http://api.baojia.local/v1/stocks/3417</a></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/3248867-2b3cd8e1b5394f79.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="2017-08-23 11-15-08 的屏幕截图.png"></p>
+<h2 id="9-附数据表"><a href="#9-附数据表" class="headerlink" title="9 附数据表"></a>9 附数据表</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">-- MySQL dump 10.14  Distrib 5.5.52-MariaDB, for Linux (x86_64)</span><br><span class="line">--</span><br><span class="line">-- Host: localhost    Database: baojia</span><br><span class="line">-- ------------------------------------------------------</span><br><span class="line">-- Server version	5.5.52-MariaDB</span><br><span class="line"></span><br><span class="line">/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;</span><br><span class="line">/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;</span><br><span class="line">/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;</span><br><span class="line">/*!40101 SET NAMES utf8 */;</span><br><span class="line">/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;</span><br><span class="line">/*!40103 SET TIME_ZONE=&apos;+00:00&apos; */;</span><br><span class="line">/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;</span><br><span class="line">/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;</span><br><span class="line">/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE=&apos;NO_AUTO_VALUE_ON_ZERO&apos; */;</span><br><span class="line">/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;</span><br><span class="line"></span><br><span class="line">--</span><br><span class="line">-- Table structure for table `news`</span><br><span class="line">--</span><br><span class="line"></span><br><span class="line">DROP TABLE IF EXISTS `news`;</span><br><span class="line">/*!40101 SET @saved_cs_client     = @@character_set_client */;</span><br><span class="line">/*!40101 SET character_set_client = utf8 */;</span><br><span class="line">CREATE TABLE `news` (</span><br><span class="line">  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,</span><br><span class="line">  `title` varchar(50) NOT NULL,</span><br><span class="line">  `thumb` varchar(250) DEFAULT NULL,</span><br><span class="line">  `content` text,</span><br><span class="line">  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,</span><br><span class="line">  `updated_at` timestamp NOT NULL DEFAULT &apos;0000-00-00 00:00:00&apos;,</span><br><span class="line">  PRIMARY KEY (`id`)</span><br><span class="line">) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;</span><br><span class="line">/*!40101 SET character_set_client = @saved_cs_client */;</span><br><span class="line"></span><br><span class="line">--</span><br><span class="line">-- Dumping data for table `news`</span><br><span class="line">--</span><br><span class="line"></span><br><span class="line">LOCK TABLES `news` WRITE;</span><br><span class="line">/*!40000 ALTER TABLE `news` DISABLE KEYS */;</span><br><span class="line">INSERT INTO `news` VALUES (1,&apos;1111&apos;,NULL,&apos;1111&apos;,&apos;0000-00-00 00:00:00&apos;,&apos;0000-00-00 00:00:00&apos;),(2,&apos;2222&apos;,NULL,&apos;1111&apos;,&apos;0000-00-00 00:00:00&apos;,&apos;0000-00-00 00:00:00&apos;),(3,&apos;1111&apos;,&apos;upload/火狐截图_2017-08-21T03-07-27.499Z.png&apos;,&apos;1111&apos;,&apos;0000-00-00 00:00:00&apos;,&apos;0000-00-00 00:00:00&apos;),(4,&apos;Hello World&apos;,NULL,NULL,&apos;2017-08-21 10:25:17&apos;,&apos;0000-00-00 00:00:00&apos;);</span><br><span class="line">/*!40000 ALTER TABLE `news` ENABLE KEYS */;</span><br><span class="line">UNLOCK TABLES;</span><br><span class="line">/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;</span><br><span class="line"></span><br><span class="line">/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;</span><br><span class="line">/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;</span><br><span class="line">/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;</span><br><span class="line">/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;</span><br><span class="line">/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;</span><br><span class="line">/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;</span><br><span class="line">/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;</span><br><span class="line"></span><br><span class="line">-- Dump completed on 2017-08-21 21:25:07</span><br></pre></td></tr></table></figure>
+<h2 id="10-参考"><a href="#10-参考" class="headerlink" title="10 参考"></a>10 参考</h2><p><a href="http://www.jianshu.com/p/516c99b180c4" target="_blank" rel="noopener">Yii2 高级版添加 Api 应用</a></p>
+<p><a href="http://www.jianshu.com/p/658679dadeb0" target="_blank" rel="noopener">postman的安装和用法</a></p>
+<p><a href="http://www.yiichina.com/doc/guide/2.0/rest-quick-start" target="_blank" rel="noopener">Yii2 Restful Web 服务</a></p>
+<p><a href="http://www.ruanyifeng.com/blog/2011/09/restful.html" target="_blank" rel="noopener">理解RESTful架构</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/Yii2-Restful-快速构建-CURD/" data-id="cjfdvevtn0001n8npwhvw1760" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-restful" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/30/restful/" class="article-date">
+  <time datetime="2018-03-30T11:07:21.000Z" itemprop="datePublished">2018-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/30/restful/">restful</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>??? ???</p>
+<p>??? 2014?5?22?</p>
+<p>????</p>
+<p>???????????????????????????????????????????????????????……??</p>
+<p>??????????????????????????????????API??????????”API First”??????RESTful API??????????????????API???????????????RESTful???????????????</p>
+<p>???????RESTful API????????????????????API?????????????1?2??</p>
+<p>RESTful API<br>????</p>
+<p>API?????????????HTTPs???<br>????</p>
+<p>?????API??????????</p>
+<pre><code>https://api.example.com
+</code></pre><p>????API????????????????????????</p>
+<pre><code>https://example.org/api/
+</code></pre><p>?????Versioning?</p>
+<p>???API??????URL?</p>
+<pre><code>https://api.example.com/v1/
+</code></pre><p>?????????????HTTP??????????URL??????Github???????<br>?????Endpoint?</p>
+<p>????”??”?endpoint????API??????</p>
+<p>?RESTful???????????????resource?????????????????????????????????????????????????????????”??”?collection????API????????????</p>
+<p>????????API??????zoo??????????????????????????????????</p>
+<pre><code>https://api.example.com/v1/zoos
+https://api.example.com/v1/animals
+https://api.example.com/v1/employees
+</code></pre><p>??HTTP??</p>
+<p>?????????????HTTP?????</p>
+<p>???HTTP???????????????SQL????</p>
+<pre><code>GET?SELECT??????????????????
+POST?CREATE?????????????
+PUT?UPDATE??????????????????????????
+PATCH?UPDATE???????????????????????
+DELETE?DELETE???????????
+</code></pre><p>????????HTTP???</p>
+<pre><code>HEAD??????????
+OPTIONS?????????????????????????
+</code></pre><p>????????</p>
+<pre><code>GET /zoos????????
+POST /zoos????????
+GET /zoos/ID?????????????
+PUT /zoos/ID??????????????????????????
+PATCH /zoos/ID??????????????????????????
+DELETE /zoos/ID????????
+GET /zoos/ID/animals???????????????
+DELETE /zoos/ID/animals/ID???????????????
+</code></pre><p>???????Filtering?</p>
+<p>?????????????????????????API??????????????</p>
+<p>???????????</p>
+<pre><code>?limit=10??????????
+?offset=10?????????????
+?page=2&amp;per_page=100????????????????
+?sortby=name&amp;order=asc???????????????????????
+?animal_type_id=1???????
+</code></pre><p>???????????????API???URL???????????GET /zoo/ID/animals ? GET /animals?zoo_id=ID ????????<br>??????Status Codes?</p>
+<p>???????????????????????????????????????HTTP????</p>
+<pre><code>200 OK - [GET]????????????????????????Idempotent??
+201 CREATED - [POST/PUT/PATCH]?????????????
+202 Accepted - [*]?????????????????????
+204 NO CONTENT - [DELETE]??????????
+400 INVALID REQUEST - [POST/PUT/PATCH]??????????????????????????????????????
+401 Unauthorized - [*]???????????????????????
+403 Forbidden - [*] ??????????401????????????????
+404 NOT FOUND - [*]?????????????????????????????????????
+406 Not Acceptable - [GET]??????????????????JSON???????XML????
+410 Gone -[GET]??????????????????????
+422 Unprocesable entity - [POST/PUT/PATCH] ??????????????????
+500 INTERNAL SERVER ERROR - [*]??????????????????????????
+</code></pre><p>?????????????<br>???????Error handling?</p>
+<p>??????4xx??????????????????????????error????????????????</p>
+<pre><code>{
+    error: &quot;Invalid API key&quot;
+}
+</code></pre><p>??????</p>
+<p>???????????????????????????</p>
+<pre><code>GET /collection??????????????
+GET /collection/resource?????????
+POST /collection???????????
+PUT /collection/resource??????????
+PATCH /collection/resource??????????
+DELETE /collection/resource????????
+</code></pre><p>??Hypermedia API</p>
+<p>RESTful API????Hypermedia????????????????API????????????????????????</p>
+<p>???????api.example.com???????????????????</p>
+<pre><code>{&quot;link&quot;: {
+  &quot;rel&quot;:   &quot;collection https://www.example.com/zoos&quot;,
+  &quot;href&quot;:  &quot;https://api.example.com/zoos&quot;,
+  &quot;title&quot;: &quot;List of zoos&quot;,
+  &quot;type&quot;:  &quot;application/vnd.yourformat+json&quot;
+}}
+</code></pre><p>?????????????link??????????????????????API??rel????API?????????collection???????collection?????href??API????title??API????type???????</p>
+<p>Hypermedia API??????HATEOAS?Github?API?????????api.github.com?????????API??????</p>
+<pre><code>{
+  &quot;current_user_url&quot;: &quot;https://api.github.com/user&quot;,
+  &quot;authorizations_url&quot;: &quot;https://api.github.com/authorizations&quot;,
+  // ...
+}
+</code></pre><p>??????????????????????????api.github.com/user????????????</p>
+<pre><code>{
+  &quot;message&quot;: &quot;Requires authentication&quot;,
+  &quot;documentation_url&quot;: &quot;https://developer.github.com/v3&quot;
+}
+</code></pre><p>??????????????????????????<br>?????</p>
+<p>?1?API?????????OAuth 2.0???</p>
+<p>?2??????????????????JSON?????XML?</p>
+<p>???</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/30/restful/" data-id="cjfdvevui0008n8npjvosqoax" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-test" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/24/test/" class="article-date">
+  <time datetime="2018-03-24T14:21:36.000Z" itemprop="datePublished">2018-03-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/24/test/">test</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/24/test/" data-id="cjfdvevui0009n8npoexjwz18" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/24/hello-world/" class="article-date">
+  <time datetime="2018-03-24T12:50:12.488Z" itemprop="datePublished">2018-03-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/24/hello-world/">Hello World</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/24/hello-world/" data-id="cjfdvevui0007n8npzumyhe9f" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-详解/">Yii2 Restful 跨域调用 - CORS 详解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-跨域调用-CORS-过滤器/">Yii2 Restful 跨域调用 - CORS 过滤器</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-实现登陆验证/">Yii2 Restful 实现登陆验证</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-自定义方法/">Yii2 Restful 自定义方法</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/30/Yii2-Restful-文件上传/">Yii2 Restful  文件上传</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 risen<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
